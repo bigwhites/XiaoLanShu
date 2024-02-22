@@ -16,8 +16,11 @@
         <spring-cloud-alibaba.version>2022.0.0.0</spring-cloud-alibaba.version>
         <druid.version>1.2.9</druid.version>
         <mybatis-plus.version>3.5.5</mybatis-plus.version>
+        <mybatis-spring.version>3.0.3</mybatis-spring.version>
         <lombok.version>1.18.30</lombok.version>
         <dubbo.version>3.3.0-beta.1</dubbo.version>
+        <velocity-engine-core.version>2.3</velocity-engine-core.version>
+        <pgsql.version>42.5.0</pgsql.version>
 
     </properties>
 
@@ -62,11 +65,16 @@
             <artifactId>mybatis-plus-boot-starter</artifactId>
             <version>${mybatis-plus.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <version>${mybatis-spring.version}</version>
+        </dependency>
         <!--mybatis-plus代码生成器-->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-generator</artifactId>
-            <version>${mybatis-plus.version}</version>
+            <version>3.5.3</version>
         </dependency>
         <!--mybatis-plus代码生成器引擎-->
         <dependency>
@@ -81,7 +89,17 @@
             <artifactId>dubbo-spring-boot-starter</artifactId>
             <version>${dubbo.version}</version>
         </dependency>
-
+        <!--  pgsql      -->
+        <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${pgsql.version}</version>
+        </dependency>
+<!--        &lt;!&ndash;rabbitmq&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-amqp</artifactId>-->
+<!--        </dependency>-->
     </dependencies>
     </dependencyManagement>
 
