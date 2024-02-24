@@ -32,3 +32,15 @@ build/
 /node_modules/
 ### VS Code ###
 .vscode/
+/api-common/.mvn/wrapper/maven-wrapper.jar
+/gateway/.mvn/wrapper/maven-wrapper.jar
+/user-info/.mvn/wrapper/maven-wrapper.jar
+/api-common/.mvn/wrapper/maven-wrapper.properties
+/gateway/.mvn/wrapper/maven-wrapper.properties
+/user-info/.mvn/wrapper/maven-wrapper.properties
+/api-common/mvnw
+/gateway/mvnw
+/user-info/mvnw
+/api-common/mvnw.cmd
+/gateway/mvnw.cmd
+/user-info/mvnw.cmd
