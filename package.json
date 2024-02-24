@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@nestjs-modules/ioredis": "^2.0.1",
+    "@nestjs/common": "^10.3.3",
+    "ioredis": "^5.3.2",
+    "redis": "^4.6.13"
+  }
+}

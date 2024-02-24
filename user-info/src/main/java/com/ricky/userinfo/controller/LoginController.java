@@ -1,6 +1,7 @@
 package com.ricky.userinfo.controller;
 
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.ricky.apicommon.userInfo.entity.UserBasic;
 import com.ricky.apicommon.utils.result.R;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.Date;
 
 @Slf4j
 @RestController
@@ -28,12 +30,12 @@ public class LoginController {
     R<String> sendRegEmail(@RequestBody UserBasic userBasic){
         try {
             //检查email唯一
-
+//            System.out.println(userBasic);
             //发送注册邮件
             rabbitTemplate.convertAndSend(MailSentRabbitConfig.EXCHANGE_NAME,
-                    MailSentRabbitConfig.ROUTE_NAME,userBasic);
-
+                    MailSentRabbitConfig.ROUTE_NAME, JSON.toJSONString(userBasic));
             //返回成功
+            System.out.println(JSON.toJSONString(userBasic));
             return ResultFactory.ok();
         }
         catch (Exception e){
@@ -63,6 +65,7 @@ public class LoginController {
             return ResultFactory.fail(e.getMessage());
         }
     }
+
 
 
 
