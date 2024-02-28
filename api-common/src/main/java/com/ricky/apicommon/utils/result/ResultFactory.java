@@ -17,6 +17,10 @@ public class ResultFactory {
         return  new R<>(null,false,msg);
     }
 
+    public static <T> R<T> fail(){
+        return  new R<>(null,false,"未知错误");
+    }
+
 
 
 

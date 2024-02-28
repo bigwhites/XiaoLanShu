@@ -27,10 +27,6 @@ public class UserBasic implements Serializable {
 
     private String userEmail;
 
-    private String uSex;
-
-    private String nickname;
-
     @TableLogic(delval = "1",value = "0")
     private Integer delFlag;
 

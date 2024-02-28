@@ -8,6 +8,9 @@ import { EmailSendSubscriberModule } from './email-send-subscriber/email-send-su
 import * as winston from 'winston';
 import 'winston-daily-rotate-file';
 import { RedisCacheModule } from './config/redis-cache.module';
+import { FileUploadModule } from './file-upload/file-upload.module';
+;
+
 @Module({
   imports: [
     WinstonModule.forRoot({
@@ -31,6 +34,7 @@ import { RedisCacheModule } from './config/redis-cache.module';
     }),
     RedisCacheModule,
     EmailSendSubscriberModule,
+    FileUploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

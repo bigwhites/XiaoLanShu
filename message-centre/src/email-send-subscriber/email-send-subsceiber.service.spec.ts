@@ -9,7 +9,9 @@ describe('EmailSendSubsceiberService', () => {
       providers: [EmailSendSubscriberService],
     }).compile();
 
-    service = module.get<EmailSendSubscriberService>(EmailSendSubscriberService);
+    service = module.get<EmailSendSubscriberService>(
+      EmailSendSubscriberService,
+    );
   });
 
   it('should be defined', () => {

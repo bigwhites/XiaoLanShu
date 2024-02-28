@@ -8,13 +8,12 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>user-info</artifactId>
+    <artifactId>blog-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>user-info</name>
-    <description>user-info</description>
+    <name>blog-server</name>
+    <description>blog-server</description>
     <properties>
         <java.version>17</java.version>
-           <skipTests>true</skipTests>
     </properties>
     <dependencies>
         <dependency>
@@ -39,19 +38,26 @@
         <dependency>
             <groupId>com.alibaba.spring</groupId>
             <artifactId>spring-context-support</artifactId>
-<!--            <version>1.0.10</version>-->
+            <!--            <version>1.0.10</version>-->
         </dependency>
         <!--dubbo的依赖-->
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo-spring-boot-starter</artifactId>
         </dependency>
-<!--        &lt;!&ndash;这里遇到一个bug，调用dubbo接口会报java.lang.NoClassDefFoundError&ndash;&gt;-->
+        <!--        &lt;!&ndash;这里遇到一个bug，调用dubbo接口会报java.lang.NoClassDefFoundError&ndash;&gt;-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.hibernate</groupId>-->
+        <!--            <artifactId>hibernate-validator</artifactId>-->
+        <!--            <version>5.2.4.Final</version>-->
+        <!--        </dependency>-->
+
+        <!--添加JDBC启动器-->
 <!--        <dependency>-->
-<!--            <groupId>org.hibernate</groupId>-->
-<!--            <artifactId>hibernate-validator</artifactId>-->
-<!--            <version>5.2.4.Final</version>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-jdbc</artifactId>-->
 <!--        </dependency>-->
+
 
         <!-- API接口包 -->
         <dependency>
@@ -93,7 +99,6 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
-
         <!--集成druid连接池-->
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -105,26 +110,26 @@
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
-        <!--mybatis-plus代码生成器-->
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-generator</artifactId>
-        </dependency>
-        <!--mybatis-plus代码生成器引擎-->
-        <dependency>
-            <groupId>org.apache.velocity</groupId>
-            <artifactId>velocity-engine-core</artifactId>
-        </dependency>
-        <!-- Redis jedis客户端 -->
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-        </dependency>
 
         <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>dynamic-datasource-spring-boot3-starter</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
+<!--        &lt;!&ndash;mybatis-plus代码生成器&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.baomidou</groupId>-->
+<!--            <artifactId>mybatis-plus-generator</artifactId>-->
+<!--        </dependency>-->
+<!--        &lt;!&ndash;mybatis-plus代码生成器引擎&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.velocity</groupId>-->
+<!--            <artifactId>velocity-engine-core</artifactId>-->
+<!--        </dependency>-->
+        <!-- Redis jedis客户端 -->
+<!--        <dependency>-->
+<!--            <groupId>redis.clients</groupId>-->
+<!--            <artifactId>jedis</artifactId>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -137,9 +142,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-
-                    <source>17</source>
-                    <target>17</target>
+<!--                    /<mainClass>com.ricky.blogserver.BlogServerApplication</mainClass>-->
+                    <source>19</source>
+                    <target>19</target>
                 </configuration>
             </plugin>
         </plugins>

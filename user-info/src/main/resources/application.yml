@@ -1,4 +1,92 @@
+logging:
+  level:
+    com.baomidou: debug
 spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  main:
+    # 允许bean定义覆盖
+    allow-bean-definition-overriding: true
+
+  datasource:
+    druid:
+      stat-view-servlet:
+        enabled: true
+        login-username: admin
+        login-password: 123456
+    dynamic:
+      strict: false #设置严格模式,默认false不启动. 启动后在未匹配到指定数据源时候会抛出异常,不启动则使用默认数据源.
+      druid:
+        validation-query: select 1
+      datasource:
+        master:
+          driver-class-name: org.postgresql.Driver
+          username: postgres
+          password: 123456
+          url: jdbc:postgresql://localhost:5433/user_info?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
+        slave1:
+          driver-class-name: org.postgresql.Driver
+          username: postgres
+          password: 123456
+          url: jdbc:postgresql://localhost:5434/user_info?useSSL=false&characterEncoding=UTF-8&serverTimezone=UT
+        slave2:
+          driver-class-name: org.postgresql.Driver
+          username: postgres
+          password: 123456
+          url: jdbc:postgresql://localhost:5435/user_info?useSSL=false&characterEncoding=UTF-8&serverTimezone=UT
+    props:
+      sql:
+        show: true  # 开启SQL显示，默认false
+#  druid:
+
+#  # 配置Sharding-JDBC读写分离规则
+#  shardingsphere:
+#    # 指定数据源
+#    datasource:
+#      # 配置主库数据源
+#      master: # 必须跟上面names对应
+##        type: com.alibaba.druid.pool.DruidDataSource
+#        driverClassName: org.postgresql.Driver
+#        jdbcUrl: jdbc:postgresql://localhost:5433/user_info?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
+#        username: postgres
+#        password: 123456
+#      # 配置从库数据源
+#      slave1: # 必须跟上面names对应
+##        type: com.alibaba.druid.pool.DruidDataSource #引入druid数据源
+#        driverClassName: org.postgresql.Driver
+#        jdbcUrl: jdbc:postgresql://localhost:5434/user_info?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
+#        username: postgres
+#        password: 123456
+#      slave2: # 必须跟上面names对应
+##        type: com.alibaba.druid.pool.DruidDataSource #引入druid数据源
+#        driverClassName: org.postgresql.Driver
+#        jdbcUrl: jdbc:postgresql://localhost:5435/user_info?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
+#        username: postgres
+#        password: 123456
+#      names: master,slave1,slave2  # 一主一从
+#    sharding:
+#      master-slave-rules:
+#        load-balance-algorithm-type: round_robin  # 多个从库的负载均衡策略：轮询
+#        name: dataSource  # 最终的数据源名称
+#        master-data-source-name: master # 主库数据源名称
+#        slave-data-source-names: slave1,slave2  # 从库数据源名称列表，多个逗号分隔
+#    masterSlaveRule:
+#      name: ds_ms
+#      master-data-source-name: master
+#      slaveDataSourceNames:
+#        - slave1
+#        - slave2
+
+  #      # 读写分离配置
+#      master-slave:
+#        load-balance-algorithm-type: round_robin  # 多个从库的负载均衡策略：轮询
+#        name: dataSources  # 最终的数据源名称
+#        master-data-source-name: master # 主库数据源名称
+#        slave-data-source-names: slave1,slave2  # 从库数据源名称列表，多个逗号分隔
+#      props:
+#        sql:
+#          show: true  # 开启SQL显示，默认false
+
   # rabbitmq消息队列配置
   rabbitmq:
     password: 123456
@@ -27,63 +115,29 @@ spring:
       mandatory: true
   application:
     name: user-info
-  datasource:
-    type: com.alibaba.druid.pool.DruidDataSource #引入druid数据源
-    driver-class-name: org.postgresql.Driver
 
-    url: jdbc:postgresql://localhost:5432/user_info?useSSL=false
-    username: postgres
-    password: 123456
-    druid:
-      # ########## 连接池配置-开始 ##########
-      initial-size: 8 #初始化大小
-      min-idle: 8 #最小连接数
-      max-active: 25 #最大连接数
-      max-wait: 100000 #配置获取连接等待超时的时间
-      pool-prepared-statements: true #是否缓存preparedStatement，也就是PSCache。PSCache对支持游标的数据库性能提升巨大，比如说oracle。在mysql5.5以下的版本中没有PSCache功能，建议关闭掉。5.5及以上版本有PSCache，建议开启。
-      max-pool-prepared-statement-per-connection-size: 20 #配置PSCache的大小
-      validation-query: SELECT 1 FROM DUAL #用来检测连接是否有效的sql，要求是一个查询语句，常用SELECT 1 FROM DUAL
-      validation-query-timeout: 8000 #检测连接是否有效的超时时间，单位是秒。底层调用jdbc Statement对象的void setQueryTimeout(int seconds)方法
-      test-on-borrow: false #申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能
-      test-on-return: false #是否在归还到池中前进行检验
-      test-while-idle: true #是否在连接池空闲一段时间后检验连接有效性
-      time-between-eviction-runs-millis: 60000 #配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
-      min-evictable-idle-time-millis: 300000 #配置一个连接在池中最小生存的时间，单位是毫秒
-      max-evictable-idle-time-millis: 600000 #配置连接池中连接，在时间段内一直空闲，被逐出连接池的时间，单位毫秒。在minEvictableIdleTimeMillis基础上扩展，会在minEvictableIdleTimeMillis基础上判断连接是否空闲（默认逐出时间就是minEvictableIdleTimeMillis）
-      #max-open-prepared-statements: #和上面的等价
-      #   配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
-      #filters: stat,wall,log4j
-      use-global-data-source-stat: true #是否使用统计
-      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000 #合并多个DruidDataSource的监控数据
-      # ########## 连接池配置-结束 ##########:
-      # ########## 连接池监控配置-开始 ##########
-      # WebStatFilter配置，说明请参考Druid Wiki，配置_配置WebStatFilter
-      web-stat-filter:
-        enabled: true #是否启用StatFilter，默认值false
-        url-pattern: '/*' #需要拦截的url
-        exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*' #过滤器忽略的资源
-        session-stat-enable: true #是否开启session统计功能，默认值false
-        session-stat-max-count: 1000 #session统计最大值
-        principal-session-name: #session用户信息
-        principal-cookie-name: #session用户cookie名称
-        profile-enable: true #监控单个url调用的sql列表
-      # StatViewServlet配置，说明请参考Druid Wiki，配置_StatViewServlet配置
-      stat-view-servlet:
-        enabled: true #是否启用StatViewServlet（监控页面）默认值为false（考虑到安全问题默认并未启动，如需启用建议设置密码或白名单以保障安全）
-        url-pattern: /druid/* #监控页面拦截url
-        reset-enable: false #是否启用重置功能
-        login-username: admin #监控页面登录用户名
-        login-password: admin #监控页面登录用户密码
-        #StatViewSerlvet展示出来的监控信息比较敏感，是系统运行的内部情况，如果你需要做访问控制，可以配置allow和deny这两个参数
-        #deny优先于allow，如果在deny列表中，就算在allow列表中，也会被拒绝。如果allow没有配置或者为空，则允许所有访问
-        #配置的格式
-        #<IP>或者<IP>/<SUB_NET_MASK_size>其中128.242.127.1/24，配置多个英文逗号分隔
-        #24表示，前面24位是子网掩码，比对的时候，前面24位相同就匹配,不支持IPV6。
-        allow: 127.0.0.1
-        deny: #黑名单
-      # Spring监控配置，说明请参考Druid Github Wiki，配置_Druid和Spring关联监控配置
-      #aop-patterns: com.demo.*.service.* #Spring监控AOP切入点，如x.y.z.service.*,配置多个英文逗号分隔
-      # ########## 连接池监控配置-结束 ##########  http://localhost:8080/druid/index.html
+
+#  datasource:
+#    type: com.alibaba.druid.pool.DruidDataSource #引入druid数据源
+#    driver-class-name: org.postgresql.Driver
+#
+#    url: jdbc:postgresql://localhost:5432/user_info?useSSL=false
+#    username: postgres
+#    password: 123456
+
+
+  data:
+    redis:
+      port: 6379 #端口号
+#      password: 123456 #输入redis数据库密码
+      host:  localhost  #输入ip地址
+      jedis:
+        pool:
+          max-idle: 6    #最大空闲数
+          max-active: 20 #最大连接数
+          min-idle: 4    #最小空闲数
+      timeout: 5000   #连接超时
+      database: 0
 dubbo:
   application:
     name: ${spring.application.name}

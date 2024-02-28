@@ -43,7 +43,7 @@ export class EmailSendSubscriberService {
           const validCode = VerificationCodeUtil.generateDigitCode(6);
           const mailOptions: emailSender.MailOptions = {
             from: null,
-            to: 'ljq2770385913@gamil.com',
+            to: '2770385913@qq.com',
             subject: '[小蓝书平台] 您的验证码',
             html:
               '<h1>欢迎注册小蓝书!</h1>' +
@@ -55,6 +55,7 @@ export class EmailSendSubscriberService {
           await this.sender.sendMail(mailOptions);
           await this.redisClient.set(userEmail, validCode);
           this.logger.info('send a code 2 ' + userEmail + 'as' + validCode);
+          this.redisClient.expire(userEmail,5*60);
         }
         // 确认消息已被处理
         this.channel.ack(msg);

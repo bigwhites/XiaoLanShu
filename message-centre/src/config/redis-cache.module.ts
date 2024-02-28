@@ -7,8 +7,10 @@ import { RedisModule } from '@nestjs-modules/ioredis';
       useFactory: () => ({
         type: 'single',
         url: 'redis://localhost:6379',
+        // db: 3,
       }),
     }),
   ],
 })
-export class RedisCacheModule {}
+export class RedisCacheModule {
+}
