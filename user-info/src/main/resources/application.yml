@@ -34,9 +34,9 @@ spring:
           username: postgres
           password: 123456
           url: jdbc:postgresql://localhost:5435/user_info?useSSL=false&characterEncoding=UTF-8&serverTimezone=UT
-    props:
-      sql:
-        show: true  # 开启SQL显示，默认false
+      props:
+        sql:
+          show: true  # 开启SQL显示，默认false
 #  druid:
 
 #  # 配置Sharding-JDBC读写分离规则
@@ -138,16 +138,9 @@ spring:
           min-idle: 4    #最小空闲数
       timeout: 5000   #连接超时
       database: 0
-dubbo:
-  application:
-    name: ${spring.application.name}
-    qos-enable: true
-    qos-port: 33333
-    qos-accept-foreign-ip: true
-  protocol:
-    name: dubbo
-    port: -1
-  registry:
-    address: nacos://localhost:8848
+
+    group: USER_INFO_DUBBO
 server:
   port: 10000
+  http2:
+    enabled: true

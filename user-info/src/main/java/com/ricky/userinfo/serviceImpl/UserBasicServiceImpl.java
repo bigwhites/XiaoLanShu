@@ -16,7 +16,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ricky.userinfo.utils.JedisUtils;
 import jakarta.annotation.Resource;
 //import javax.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
+//import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.RandomStringUtils;
+import org.checkerframework.checker.units.qual.A;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +30,7 @@ import redis.clients.jedis.Jedis;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * <p>
@@ -36,11 +41,13 @@ import java.util.Objects;
  * @since 2024-02-22
  */
 @Service
-@Slf4j
+//@Slf4j
 public class UserBasicServiceImpl extends ServiceImpl<UserBasicMapper, UserBasic> implements IUserBasicService {
 
     @Autowired
     JedisUtils jedisUtils;
+
+    final private Logger log = LoggerFactory.getLogger(UserBasicServiceImpl.class);
 
     @Transactional
     public Map<String, Object> reg(String jsonData) {
@@ -58,11 +65,21 @@ public class UserBasicServiceImpl extends ServiceImpl<UserBasicMapper, UserBasic
                 throw new XiaoLanShuException("验证码已经过期");
             }
             System.out.println(userBasic);
-
-            //insert 2 db
-            super.save(userBasic);
-            log.info(userBasic.toString());
-
+            int cnt = 0;
+            while (true) {
+                String randomName = RandomStringUtils.random(10, true, true);
+                userBasic.setUserName("xhs" + randomName);
+                //insert 2 db
+                boolean saved = super.save(userBasic);
+                if (saved) {
+                    break;
+                }
+                cnt++;
+                if (cnt >= 3) {
+                    throw new RuntimeException();
+                }
+                log.info(userBasic.toString());
+            }
             //删除验证码
             jedis.del(userBasic.getUserEmail());
 

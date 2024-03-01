@@ -1,4 +1,4 @@
-package com.ricky.apicommon.utils;
+package com.ricky.blogserver.utils;
 
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.RedisTemplate;

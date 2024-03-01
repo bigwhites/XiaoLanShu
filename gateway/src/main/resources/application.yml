@@ -1,0 +1,36 @@
+server:
+  port: 8078
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+spring:
+  application:
+    name: gateway
+  cloud:
+
+    gateway:
+      routes:
+        - id: user_info
+          uri: http://localhost:10000/
+          predicates:
+            - Path=/api/v1/userInfo/**
+          filters:
+            - StripPrefix=3
+
+        - id: message_centre
+          uri: http://localhost:3000/
+          predicates:
+            - Path=/api/v1/messageCentre/**
+          filters:
+            - StripPrefix=3
+            # 去除路径中的前两个层级，例如将/api/v1/my-resource/xxx 转发为 /my-re
+dubbo:
+  application:
+    name: ${spring.application.name}
+  registry:
+    address: nacos://localhost:8848
+    password: nacos
+    username: nacos
+  protocol:
+    name: dubbo
+    port: -1

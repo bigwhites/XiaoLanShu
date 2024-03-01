@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.web.reactive.config.EnableWebFlux;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
-//@SpringBootApplication()
+
 @EnableDubbo
 public class UserInfoApplication {
     public static void main(String[] args) {

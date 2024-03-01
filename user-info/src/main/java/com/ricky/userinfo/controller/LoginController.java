@@ -18,9 +18,10 @@ import com.ricky.userinfo.serviceImpl.UserDetailServiceImpl;
 import com.ricky.userinfo.utils.JedisUtils;
 import jakarta.annotation.Resource;
 //import javax.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
+//import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import redis.clients.jedis.Jedis;
@@ -39,6 +40,7 @@ public class LoginController {
 
     @Autowired
     UserDetailServiceImpl userDetailService;
+
 
 
     @PostMapping("/sendRegEmail")
@@ -99,6 +101,7 @@ public class LoginController {
         } catch (XiaoLanShuException e) {
             return ResultFactory.fail(e.getMessage());
         } catch (Exception e) {
+            e.printStackTrace();
             return ResultFactory.fail();
         }
     }

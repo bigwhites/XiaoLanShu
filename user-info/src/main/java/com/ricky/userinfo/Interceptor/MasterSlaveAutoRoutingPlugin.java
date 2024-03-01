@@ -2,7 +2,7 @@ package com.ricky.userinfo.Interceptor;
 
 
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
-import lombok.extern.slf4j.Slf4j;
+//import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Intercepts({@Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class}),
         @Signature(type = Executor.class, method = "update", args = {MappedStatement.class, Object.class})})
-@Slf4j
+//@Slf4j
 //@Component
 public class MasterSlaveAutoRoutingPlugin implements Interceptor {
 
@@ -34,7 +34,6 @@ public class MasterSlaveAutoRoutingPlugin implements Interceptor {
 
     @Override
     public Object intercept(Invocation invocation) throws Throwable {
-        System.out.println("拦截了");
         Object[] args = invocation.getArgs();
         MappedStatement ms = (MappedStatement) args[0];
         try {

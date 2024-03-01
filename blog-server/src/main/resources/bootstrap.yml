@@ -2,7 +2,7 @@ spring:
   profiles:
     active: dev
   application:
-    name: userInfo
+    name: blogServer
   cloud:
     nacos:
       discovery:
@@ -10,19 +10,19 @@ spring:
         port: 8848
         username: nacos
         password: nacos
-        group: USER_INFO
+        group: BLOG_SERVER
       config:
         server-addr: localhost:8848
         file-extension: yaml
-        username: userInfo
-        password: userInfo
-        group: USER_INFO
-        prefix: userInfo
+        username: blogServer
+        password: blogServer
+        group: BLOG_SERVER
+        prefix: blogServer
 dubbo:
   application:
     name: ${spring.application.name}
     qos-enable: true
-    qos-port: 33333
+    qos-port: 33335
     qos-accept-foreign-ip: true
   protocol:
     name: dubbo

@@ -5,8 +5,6 @@ import com.baomidou.mybatisplus.annotation.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * <p>
@@ -16,12 +14,12 @@ import lombok.Setter;
  * @author bigwhites
  * @since 2024-02-27
  */
-@Getter
-@Setter
+//@Getter
+//@Setter
 @TableName("user_detail")
 public class UserDetail implements Serializable {
 
-    @TableId(value = "uuid",type = IdType.INPUT)
+    @TableId(value = "uuid", type = IdType.INPUT)
     private String uuid;
 
     private String uSex;
@@ -32,6 +30,85 @@ public class UserDetail implements Serializable {
 
     private LocalDate birthday;
 
+    private String uAvatar;
+
+    private String cover;
+
+    @TableField(fill = FieldFill.UPDATE)
+    private LocalDate updateDate;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDate createDate;
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getUSex() {
+        return uSex;
+    }
+
+    public void setUSex(String uSex) {
+        this.uSex = uSex;
+    }
+
+    public String getUAbout() {
+        return uAbout;
+    }
+
+    public void setUAbout(String uAbout) {
+        this.uAbout = uAbout;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public LocalDate getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(LocalDate birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getUAvatar() {
+        return uAvatar;
+    }
+
+    public void setUAvatar(String uAvatar) {
+        this.uAvatar = uAvatar;
+    }
+
+    public String getCover() {
+        return cover;
+    }
+
+    public void setCover(String cover) {
+        this.cover = cover;
+    }
+
+    public LocalDate getUpdateDate() {
+        return updateDate;
+    }
+
+    public void setUpdateDate(LocalDate updateDate) {
+        this.updateDate = updateDate;
+    }
+
+    public LocalDate getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(LocalDate createDate) {
+        this.createDate = createDate;
+    }
 }

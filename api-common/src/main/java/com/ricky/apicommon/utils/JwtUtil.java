@@ -7,8 +7,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import com.sun.source.tree.Tree;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+//import lombok.Data;
+//import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -23,8 +23,8 @@ import java.util.*;
  * @date 2021/08/09 16:27
  **/
 @Component
-@Data
-@Slf4j
+//@Data
+//@Slf4j
 public class JwtUtil {
 
     public static final String USER_ID = "usserIdxyz";
@@ -60,7 +60,7 @@ public class JwtUtil {
      * @param playLoadMap 封装包含用户信息的map
      * @return
      */
-    private static String createToken(Map<String, String> playLoadMap) {
+    public static String createToken(Map<String, String> playLoadMap) {
         // playload主体信息为空则不生成token
         if (CollectionUtils.isEmpty(playLoadMap)) {
             return null;
