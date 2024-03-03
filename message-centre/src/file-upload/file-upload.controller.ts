@@ -43,7 +43,6 @@ export class FileUploadController {
           cb(null, fileDir);
         },
         filename: async (req, file, cb) => {
-          // 动态生成文件名
           const redisClient = new Redis();
           const fileNameKey =
             req.headers[AppConfig.FILE_NAME_HEADER].toString();
@@ -54,9 +53,13 @@ export class FileUploadController {
       }),
     }),
   )
-  @HttpCode(200)
+  @HttpCode(200) //TODO 解决存储泄露
   uploadOne(@UploadedFile() file: Express.Multer.File): R {
-    this.logger.info(file);
-    return R.success();
+    try {
+      this.logger.info(file);
+      return R.success();
+    } catch (e) {
+      return R.fail('失败');
+    }
   }
 }

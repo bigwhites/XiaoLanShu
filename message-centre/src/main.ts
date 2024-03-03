@@ -45,6 +45,10 @@ async function bootstrap() {
   const app = await NestFactory.create<NestApplication>(AppModule);
   app.useStaticAssets(AppConfig.FILE_ROOT); // 配置静态资源目录
 
+  app.useStaticAssets(AppConfig.FILE_ROOT, {
+    prefix: AppConfig.STATIC_ROUTE,
+  });
+  app.enableCors();
   await app.listen(3000);
 }
 

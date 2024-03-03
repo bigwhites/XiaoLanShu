@@ -12,6 +12,7 @@ import { VerificationCodeUtil } from '../utils/VerificationCodeUtil';
 export class EmailSendSubscriberService {
   private channel: amqp.Channel;
   private sender: emailSender.EmailSender;
+
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     @InjectRedis()
@@ -51,11 +52,11 @@ export class EmailSendSubscriberService {
               validCode +
               '。</p>',
           };
-          //gen valid code
-          await this.sender.sendMail(mailOptions);
+          // //gen valid code
+          // await this.sender.sendMail(mailOptions);
           await this.redisClient.set(userEmail, validCode);
           this.logger.info('send a code 2 ' + userEmail + 'as' + validCode);
-          this.redisClient.expire(userEmail,5*60);
+          this.redisClient.expire(userEmail, 5 * 60);
         }
         // 确认消息已被处理
         this.channel.ack(msg);
