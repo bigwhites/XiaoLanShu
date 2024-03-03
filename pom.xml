@@ -25,6 +25,8 @@
         <jwt.version>0.9.1</jwt.version>
         <joda.time.version>2.10.14</joda.time.version>
         <dynmaic-datasource.version>4.2.0</dynmaic-datasource.version>
+        <hutool.version>5.8.10</hutool.version>
+        <mp.join.version>1.4.10</mp.join.version>
     </properties>
 
     <parent>
@@ -108,6 +110,11 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-data-redis</artifactId>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-redis</artifactId>
                 <version>${spring-boot.version}</version>
             </dependency>
 
@@ -123,6 +130,17 @@
                 <artifactId>dynamic-datasource-spring-boot3-starter</artifactId>
                 <version>${dynmaic-datasource.version}</version>
             </dependency>
+            <!--   mybatis-plus 连接查询  -->
+            <dependency>
+                <groupId>com.github.yulichang</groupId>
+                <artifactId>mybatis-plus-join-boot-starter</artifactId>
+                <version>${mp.join.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.verison}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -131,12 +149,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
+
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
@@ -152,7 +165,10 @@
         <module>user-info</module>
         <module>blog-server</module>
     </modules>
+
     <build>
+
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -166,5 +182,6 @@
             </plugin>
         </plugins>
     </build>
+
 
 </project>
