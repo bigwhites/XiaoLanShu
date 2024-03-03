@@ -6,6 +6,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ricky.apicommon.XiaoLanShuException;
 import com.ricky.apicommon.constant.Constant;
+import com.ricky.apicommon.userInfo.DTO.UserDTO;
 import com.ricky.apicommon.userInfo.entity.UserBasic;
 import com.ricky.apicommon.userInfo.entity.UserDetail;
 import com.ricky.apicommon.utils.JwtUtil;
@@ -19,6 +20,9 @@ import com.ricky.userinfo.utils.JedisUtils;
 import jakarta.annotation.Resource;
 //import javax.annotation.Resource;
 //import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,23 +45,23 @@ public class LoginController {
     @Autowired
     UserDetailServiceImpl userDetailService;
 
-
+    private Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @PostMapping("/sendRegEmail")
     R<String> sendRegEmail(@RequestBody UserBasic userBasic) {
         try {
             //检查email唯一
-//            System.out.println(userBasic);
             boolean existedUser = userBasicService.getBaseMapper().exists(new LambdaQueryWrapper<UserBasic>()
                     .eq(UserBasic::getUserEmail, userBasic.getUserEmail()));
             if (existedUser) {
                 return ResultFactory.fail("已经存在用户");
             }
-            //发送注册邮件
-            rabbitTemplate.convertAndSend(MailSentRabbitConfig.EXCHANGE_NAME,
-                    MailSentRabbitConfig.ROUTE_NAME, JSON.toJSONString(userBasic));
+            //测试时关闭
+//            //发送注册邮件
+//            rabbitTemplate.convertAndSend(MailSentRabbitConfig.EXCHANGE_NAME,
+//                    MailSentRabbitConfig.ROUTE_NAME, JSON.toJSONString(userBasic));
             //返回成功
-            System.out.println(JSON.toJSONString(userBasic));
+            log.debug(JSON.toJSONString(userBasic));
             return ResultFactory.ok();
         } catch (Exception e) {
             return ResultFactory.fail(e.getMessage());
@@ -72,7 +76,11 @@ public class LoginController {
             return ResultFactory.success(reg);
         } catch (Exception e) {
             if (e instanceof XiaoLanShuException) {
-                return ResultFactory.fail("验证码错误或已过期");
+                if (!StringUtils.isEmpty(e.getMessage())) {
+                    return ResultFactory.fail(e.getMessage());
+                } else {
+                    return ResultFactory.fail("验证码错误或已过期");
+                }
             }
             e.printStackTrace();
             return ResultFactory.fail();
@@ -91,20 +99,7 @@ public class LoginController {
         }
     }
 
-    @GetMapping("/userDetail/{uId}")
-    public R<UserDetail> getDetail(
-            @PathVariable String uId
-    ) {
-        try {
-            UserDetail userDetail = userDetailService.getUserDetail(uId);
-            return ResultFactory.success(userDetail);
-        } catch (XiaoLanShuException e) {
-            return ResultFactory.fail(e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResultFactory.fail();
-        }
-    }
+
 
 
 }

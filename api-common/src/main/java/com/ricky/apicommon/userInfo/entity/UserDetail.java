@@ -34,11 +34,35 @@ public class UserDetail implements Serializable {
 
     private String cover;
 
+    private long followCount;
+
+    private long  fansCount;
+
     @TableField(fill = FieldFill.UPDATE)
     private LocalDate updateDate;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDate createDate;
+
+    public long getFollowCount() {
+        return followCount;
+    }
+
+    public void setFollowCount(long followCount) {
+        this.followCount = followCount;
+    }
+
+    public long getFansCount() {
+        return fansCount;
+    }
+
+    public void setFansCount(long fansCount) {
+        this.fansCount = fansCount;
+    }
+
+    public UserDetail(String uuid) {
+        this.uuid = uuid;
+    }
 
     public String getUuid() {
         return uuid;
@@ -110,5 +134,22 @@ public class UserDetail implements Serializable {
 
     public void setCreateDate(LocalDate createDate) {
         this.createDate = createDate;
+    }
+
+    @Override
+    public String toString() {
+        return "UserDetail{" +
+                "uuid='" + uuid + '\'' +
+                ", uSex='" + uSex + '\'' +
+                ", uAbout='" + uAbout + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", birthday=" + birthday +
+                ", uAvatar='" + uAvatar + '\'' +
+                ", cover='" + cover + '\'' +
+                ", followCount=" + followCount +
+                ", fansCount=" + fansCount +
+                ", updateDate=" + updateDate +
+                ", createDate=" + createDate +
+                '}';
     }
 }

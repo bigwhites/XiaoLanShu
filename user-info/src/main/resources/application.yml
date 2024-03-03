@@ -1,6 +1,7 @@
 logging:
   level:
     com.baomidou: debug
+    com.ricky : debug
 spring:
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration

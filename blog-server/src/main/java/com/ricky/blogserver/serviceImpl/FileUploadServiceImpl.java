@@ -1,24 +1,28 @@
 package com.ricky.blogserver.serviceImpl;
 
+import com.alibaba.fastjson2.JSON;
+import com.ricky.apicommon.blogServer.DTO.FileDTO;
 import com.ricky.apicommon.blogServer.DTO.UploadReqDTO;
 import com.ricky.apicommon.blogServer.service.IFileUploadService;
 import com.ricky.apicommon.constant.RedisPrefix;
-import com.ricky.apicommon.utils.JwtUtil;
-import com.ricky.blogserver.utils.RedisUtil;
+import com.ricky.blogserver.config.RabbitConfig;
 import jakarta.annotation.Resource;
 import org.apache.dubbo.config.annotation.DubboService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 
 @DubboService
 public class FileUploadServiceImpl implements IFileUploadService {
 
     @Resource
-    RedisUtil redisUtil;
+    StringRedisTemplate stringRedisTemplate;
 
+    @Resource
+    RabbitTemplate rabbitTemplate;
 
     @Override  //上传一个文件  生成headers并把数据路径和文件名存入reids
     public UploadReqDTO uploadOneFile(String filePath, String originFileName) throws Exception {
@@ -30,10 +34,26 @@ public class FileUploadServiceImpl implements IFileUploadService {
         String uuid = UUID.randomUUID().toString();
         String uuidNameKey = RedisPrefix.FILENAME + uuid;
         String uuidPathKey = RedisPrefix.FILEPATH + uuid;
-        String fileName = uuid + originFileName.substring(i + 1);
-
-        redisUtil.set(uuidNameKey, fileName, 60 * 4);
-        redisUtil.set(uuidPathKey, filePath, 60 * 4);
+        String fileName = uuid + originFileName.substring(i);
+        stringRedisTemplate.opsForValue().set(uuidNameKey, fileName, 3, TimeUnit.MINUTES);
+        stringRedisTemplate.opsForValue().set(uuidPathKey, filePath, 3, TimeUnit.MINUTES);
         return new UploadReqDTO(uuidNameKey, fileName, uuidPathKey);
+    }
+
+    /**
+     * @return
+     * @description 删除静态资源文件中的单个指定文件
+     * @author Ricky01
+     * @params
+     * @since 2024/3/3
+     **/
+    @Override
+    public boolean deleteoneFile(String filePath, String fileName) {
+        FileDTO dto = new FileDTO();
+        dto.fileName = fileName;
+        dto.filePath = filePath;
+        rabbitTemplate.convertAndSend(RabbitConfig.EXCHANGE_NAME,
+                RabbitConfig.ROUTE_NAME, JSON.toJSONString(dto));
+        return true;
     }
 }

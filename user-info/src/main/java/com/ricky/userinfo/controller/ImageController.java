@@ -24,12 +24,8 @@ public class ImageController {
     @Resource
     UserDetailServiceImpl userDetailService;
 
-    @PostMapping("/update/{type}/{uuid}")
+    @PostMapping("/updateCoverAvaTar")
         //更新头像或背景
-//    R<Object> updateCoverOrAvaTar(@PathVariable("type") String type,
-//                                  @PathVariable("uuid") String uuid,
-//
-//                                  @RequestBody String originFileName) {
     R<UploadReqDTO> updateCoverOrAvaTar(@RequestBody FileUploadVO fileUploadVO) {
         try {
             return ResultFactory.success(userDetailService.updateCoverOrAvaTar(fileUploadVO.uuid,

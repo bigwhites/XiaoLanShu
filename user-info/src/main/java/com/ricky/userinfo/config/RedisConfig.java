@@ -1,4 +1,4 @@
-package com.ricky.blogserver.config;
+package com.ricky.userinfo.config;
 
 
 
