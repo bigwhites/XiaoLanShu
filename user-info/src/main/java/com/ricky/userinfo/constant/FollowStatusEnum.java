@@ -14,4 +14,8 @@ public enum FollowStatusEnum {
         this.code = code;
     }
 
+    public boolean isFollow() {
+        return code > 2;
+    }
+
 }

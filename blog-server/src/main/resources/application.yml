@@ -4,6 +4,9 @@ server:
     enabled: true
 
 spring:
+  threads:
+    virtual:
+      enabled: true
   application:
     name: blogServer
   autoconfigure:

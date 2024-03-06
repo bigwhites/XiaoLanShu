@@ -2,7 +2,7 @@ server:
   port: 8078
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.gateway: info
 spring:
   application:
     name: gateway

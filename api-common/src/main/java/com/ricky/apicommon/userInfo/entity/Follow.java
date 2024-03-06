@@ -1,32 +1,36 @@
 package com.ricky.apicommon.userInfo.entity;
 
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author bigwhites
  * @since 2024-03-03
  */
+
+@TableName("follow")
 public class Follow implements Serializable {
 
-    public String uuid;
+    @TableId(value = "id", type = IdType.AUTO)
+    public Long id;
 
     public String fromUid;
 
     public String toUid;
 
-    public LocalDate creareDate;
+    @TableField(fill = FieldFill.INSERT)
+    public LocalDate createDate;
 
-    public String getUuid() {
-        return uuid;
-    }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public Follow(String fromUid, String toUid) {
+        this.fromUid = fromUid;
+        this.toUid = toUid;
     }
 
     public String getFromUid() {
@@ -45,21 +49,21 @@ public class Follow implements Serializable {
         this.toUid = toUid;
     }
 
-    public LocalDate getCreareDate() {
-        return creareDate;
+    public LocalDate getCreateDate() {
+        return createDate;
     }
 
-    public void setCreareDate(LocalDate creareDate) {
-        this.creareDate = creareDate;
+    public void setCreateDate(LocalDate createDate) {
+        this.createDate = createDate;
     }
 
     @Override
     public String toString() {
         return "Follow{" +
-        "uuid = " + uuid +
-        ", fromUid = " + fromUid +
-        ", toUid = " + toUid +
-        ", creareDate = " + creareDate +
-        "}";
+                "uuid = " + id +
+                ", fromUid = " + fromUid +
+                ", toUid = " + toUid +
+                ", creareDate = " + createDate +
+                "}";
     }
 }

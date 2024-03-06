@@ -6,9 +6,11 @@ import com.ricky.apicommon.userInfo.DTO.SearchUserDTO;
 import com.ricky.apicommon.userInfo.DTO.UserDTO;
 import com.ricky.apicommon.userInfo.VO.ChangeFollowVO;
 import com.ricky.apicommon.userInfo.VO.UpdateUserVo;
+import com.ricky.apicommon.userInfo.entity.Follow;
 import com.ricky.apicommon.userInfo.entity.UserDetail;
 import com.ricky.apicommon.utils.result.R;
 import com.ricky.apicommon.utils.result.ResultFactory;
+import com.ricky.userinfo.constant.FollowStatusEnum;
 import com.ricky.userinfo.serviceImpl.FollowServiceImpl;
 import com.ricky.userinfo.serviceImpl.UserBasicServiceImpl;
 import com.ricky.userinfo.serviceImpl.UserDetailServiceImpl;
@@ -86,6 +88,25 @@ public class UserController {
             e.printStackTrace();
             return ResultFactory.fail();
         }
+    }
+
+    @PostMapping("/isFollow")
+    public R<Boolean> isFoolow(@RequestBody ChangeFollowVO followVO) {
+        return ResultFactory.success(
+                followService.checkFollow(
+                        followVO.fromUuid(),
+                        followVO.toUuid()).isFollow());
+    }
+
+    @GetMapping("/test")
+    public R<String> test() {
+        try {
+//            followService.cacheFollowList2DB();
+//            followService.save(new Follow("dddd", "ssdd"));
+        } catch (Exception e) {
+            return ResultFactory.fail(e.getMessage());
+        }
+        return ResultFactory.success("ok");
     }
 
 }

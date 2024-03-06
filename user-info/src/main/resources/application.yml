@@ -1,8 +1,16 @@
 logging:
   level:
     com.baomidou: debug
-    com.ricky : debug
+    com.ricky: debug
+  file:
+    name: userInfo.log
+    path: /logs
 spring:
+  threads:
+    virtual:
+      enabled: true
+
+
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
   main:
@@ -38,55 +46,55 @@ spring:
       props:
         sql:
           show: true  # 开启SQL显示，默认false
-#  druid:
+  #  druid:
 
-#  # 配置Sharding-JDBC读写分离规则
-#  shardingsphere:
-#    # 指定数据源
-#    datasource:
-#      # 配置主库数据源
-#      master: # 必须跟上面names对应
-##        type: com.alibaba.druid.pool.DruidDataSource
-#        driverClassName: org.postgresql.Driver
-#        jdbcUrl: jdbc:postgresql://localhost:5433/user_info?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
-#        username: postgres
-#        password: 123456
-#      # 配置从库数据源
-#      slave1: # 必须跟上面names对应
-##        type: com.alibaba.druid.pool.DruidDataSource #引入druid数据源
-#        driverClassName: org.postgresql.Driver
-#        jdbcUrl: jdbc:postgresql://localhost:5434/user_info?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
-#        username: postgres
-#        password: 123456
-#      slave2: # 必须跟上面names对应
-##        type: com.alibaba.druid.pool.DruidDataSource #引入druid数据源
-#        driverClassName: org.postgresql.Driver
-#        jdbcUrl: jdbc:postgresql://localhost:5435/user_info?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
-#        username: postgres
-#        password: 123456
-#      names: master,slave1,slave2  # 一主一从
-#    sharding:
-#      master-slave-rules:
-#        load-balance-algorithm-type: round_robin  # 多个从库的负载均衡策略：轮询
-#        name: dataSource  # 最终的数据源名称
-#        master-data-source-name: master # 主库数据源名称
-#        slave-data-source-names: slave1,slave2  # 从库数据源名称列表，多个逗号分隔
-#    masterSlaveRule:
-#      name: ds_ms
-#      master-data-source-name: master
-#      slaveDataSourceNames:
-#        - slave1
-#        - slave2
+  #  # 配置Sharding-JDBC读写分离规则
+  #  shardingsphere:
+  #    # 指定数据源
+  #    datasource:
+  #      # 配置主库数据源
+  #      master: # 必须跟上面names对应
+  ##        type: com.alibaba.druid.pool.DruidDataSource
+  #        driverClassName: org.postgresql.Driver
+  #        jdbcUrl: jdbc:postgresql://localhost:5433/user_info?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
+  #        username: postgres
+  #        password: 123456
+  #      # 配置从库数据源
+  #      slave1: # 必须跟上面names对应
+  ##        type: com.alibaba.druid.pool.DruidDataSource #引入druid数据源
+  #        driverClassName: org.postgresql.Driver
+  #        jdbcUrl: jdbc:postgresql://localhost:5434/user_info?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
+  #        username: postgres
+  #        password: 123456
+  #      slave2: # 必须跟上面names对应
+  ##        type: com.alibaba.druid.pool.DruidDataSource #引入druid数据源
+  #        driverClassName: org.postgresql.Driver
+  #        jdbcUrl: jdbc:postgresql://localhost:5435/user_info?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
+  #        username: postgres
+  #        password: 123456
+  #      names: master,slave1,slave2  # 一主一从
+  #    sharding:
+  #      master-slave-rules:
+  #        load-balance-algorithm-type: round_robin  # 多个从库的负载均衡策略：轮询
+  #        name: dataSource  # 最终的数据源名称
+  #        master-data-source-name: master # 主库数据源名称
+  #        slave-data-source-names: slave1,slave2  # 从库数据源名称列表，多个逗号分隔
+  #    masterSlaveRule:
+  #      name: ds_ms
+  #      master-data-source-name: master
+  #      slaveDataSourceNames:
+  #        - slave1
+  #        - slave2
 
   #      # 读写分离配置
-#      master-slave:
-#        load-balance-algorithm-type: round_robin  # 多个从库的负载均衡策略：轮询
-#        name: dataSources  # 最终的数据源名称
-#        master-data-source-name: master # 主库数据源名称
-#        slave-data-source-names: slave1,slave2  # 从库数据源名称列表，多个逗号分隔
-#      props:
-#        sql:
-#          show: true  # 开启SQL显示，默认false
+  #      master-slave:
+  #        load-balance-algorithm-type: round_robin  # 多个从库的负载均衡策略：轮询
+  #        name: dataSources  # 最终的数据源名称
+  #        master-data-source-name: master # 主库数据源名称
+  #        slave-data-source-names: slave1,slave2  # 从库数据源名称列表，多个逗号分隔
+  #      props:
+  #        sql:
+  #          show: true  # 开启SQL显示，默认false
 
   # rabbitmq消息队列配置
   rabbitmq:
@@ -102,13 +110,13 @@ spring:
     listener:
       simple:
         #指定最小的消费者数量.
-#        concurrency: 1
+        #        concurrency: 1
         #指定最大的消费者数量.
         max-concurrency: 10
         #开启ack
         acknowledge-mode: auto
         # 最多一次消费多少条数据 -限流
-#        prefetch: 1
+      #        prefetch: 1
       direct:
         acknowledge-mode: auto
     #支持消息的确认与返回
@@ -118,20 +126,20 @@ spring:
     name: user-info
 
 
-#  datasource:
-#    type: com.alibaba.druid.pool.DruidDataSource #引入druid数据源
-#    driver-class-name: org.postgresql.Driver
-#
-#    url: jdbc:postgresql://localhost:5432/user_info?useSSL=false
-#    username: postgres
-#    password: 123456
+  #  datasource:
+  #    type: com.alibaba.druid.pool.DruidDataSource #引入druid数据源
+  #    driver-class-name: org.postgresql.Driver
+  #
+  #    url: jdbc:postgresql://localhost:5432/user_info?useSSL=false
+  #    username: postgres
+  #    password: 123456
 
 
   data:
     redis:
       port: 6379 #端口号
-#      password: 123456 #输入redis数据库密码
-      host:  localhost  #输入ip地址
+      #      password: 123456 #输入redis数据库密码
+      host: localhost  #输入ip地址
       jedis:
         pool:
           max-idle: 6    #最大空闲数
