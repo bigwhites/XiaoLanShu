@@ -26,7 +26,7 @@ dubbo:
     qos-accept-foreign-ip: true
   protocol:
     name: dubbo
-    port: -1
+    port: 20880
   registry:
     address: nacos://localhost:8848
     password: nacos

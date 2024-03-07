@@ -216,7 +216,6 @@ public class FollowServiceImpl extends MPJBaseServiceImpl<FollowMapper, Follow> 
             Set<String> followKey = stringRedisTemplate.keys(FOLLOW_CNT_PATTERN);
 
             if (CollectionUtils.isEmpty(fansKeys) || CollectionUtils.isEmpty(followKey)) {
-                log.debug("没有数据");
                 return;
             }
 

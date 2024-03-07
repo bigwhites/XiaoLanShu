@@ -29,4 +29,7 @@ public class UserDTO implements Serializable {
     public long followCount;
 
     public long fansCount;
+
+    public long blogCount; //发布的博客的数量
+
 }

@@ -2,7 +2,10 @@ server:
   port: 9999
   http2:
     enabled: true
-
+logging:
+  level:
+#    com.baomidou: debug
+    com.ricky: debug
 spring:
   banner:
     charset: UTF-8
@@ -69,15 +72,21 @@ spring:
     listener:
       simple:
         #指定最小的消费者数量.
-        #        concurrency: 1
+        concurrency: 3
         #指定最大的消费者数量.
         max-concurrency: 10
         #开启ack
-        acknowledge-mode: auto
+        acknowledge-mode: manual
         # 最多一次消费多少条数据 -限流
-      #        prefetch: 1
+        prefetch: 30
       direct:
-        acknowledge-mode: auto
+        acknowledge-mode: manual
+        retry:
+          enabled: true
+        consumers-per-queue: 1
+        prefetch: 30
+        de-batching-enabled: true
+
     #支持消息的确认与返回
     template:
       mandatory: true

@@ -25,6 +25,12 @@ public class BlogImage {
     public Long blogId;
     public Short sort;
 
+    public BlogImage(String fileName, Long blogId, Short sort) {
+        this.fileName = fileName;
+        this.blogId = blogId;
+        this.sort = sort;
+    }
+
     public Short getSort() {
         return sort;
     }

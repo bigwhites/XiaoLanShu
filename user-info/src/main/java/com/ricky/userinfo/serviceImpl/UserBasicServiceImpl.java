@@ -10,23 +10,20 @@ import com.ricky.apicommon.XiaoLanShuException;
 import com.ricky.apicommon.constant.Constant;
 import com.ricky.apicommon.constant.RedisPrefix;
 import com.ricky.apicommon.userInfo.DTO.SearchUserDTO;
-import com.ricky.apicommon.userInfo.DTO.UserDTO;
 import com.ricky.apicommon.userInfo.entity.UserBasic;
 import com.ricky.apicommon.userInfo.entity.UserDetail;
 import com.ricky.apicommon.userInfo.service.IUserBasicService;
 import com.ricky.apicommon.utils.JwtUtil;
 import com.ricky.apicommon.utils.TokenRecord;
-import com.ricky.apicommon.utils.result.ResultFactory;
 import com.ricky.userinfo.constant.DefaultValue;
 import com.ricky.userinfo.mapper.UserBasicMapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ricky.userinfo.mapper.UserDetailMapper;
 import com.ricky.userinfo.utils.JedisUtils;
 import jakarta.annotation.Resource;
 //import javax.annotation.Resource;
 //import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.RandomStringUtils;
-import org.checkerframework.checker.units.qual.A;
+import org.apache.dubbo.config.annotation.DubboService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +36,6 @@ import redis.clients.jedis.Jedis;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * <p>
@@ -50,7 +46,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @since 2024-02-22
  */
 @Service
-//@Slf4j
+@DubboService
 public class UserBasicServiceImpl extends MPJBaseServiceImpl<UserBasicMapper, UserBasic> implements IUserBasicService {
 
     @Autowired
@@ -231,5 +227,12 @@ public class UserBasicServiceImpl extends MPJBaseServiceImpl<UserBasicMapper, Us
             }
         }
         return userDTOs;
+    }
+
+    @Override
+    public Integer userExistByUuid(String uuid) {
+        boolean exists = userBasicMapper.exists(
+                new LambdaQueryWrapper<UserBasic>().eq(UserBasic::getUuid, uuid));
+        return exists ? 1 : 0;
     }
 }

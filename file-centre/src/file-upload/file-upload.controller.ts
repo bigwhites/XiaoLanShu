@@ -5,19 +5,24 @@ import {
   UseInterceptors,
   HttpCode,
   Inject,
+  UploadedFiles,
+  Req,
 } from '@nestjs/common';
 import { R } from '../utils/R';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as AppConfig from '../config/AppConfig';
 import { Redis } from 'ioredis';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { checkOrMkDir } from '../utils/dir-utils';
+import { FileUploadService } from './file-upload.service';
+import e from 'express';
 
 @Controller('fileUpload')
 export class FileUploadController {
   constructor(
+    private readonly fileUploadService: FileUploadService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
@@ -54,12 +59,31 @@ export class FileUploadController {
     }),
   )
   @HttpCode(200)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   uploadOne(@UploadedFile() file: Express.Multer.File): R {
     try {
-      this.logger.info(file);
       return R.success();
     } catch (e) {
       return R.fail('失败');
+    }
+  }
+
+  @Post('multiple')
+  @HttpCode(200)
+  @UseInterceptors(FilesInterceptor('files'))
+  async uploadFile(
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Req() request: Request,
+  ): Promise<R> {
+    try {
+      await this.fileUploadService
+        .uploadMultiple(files, request.headers[AppConfig.REDIS_KEY].toString())
+        .catch((e) => {
+          throw new Error(e);
+        });
+      return R.success('上传成功!');
+    } catch (e: any) {
+      return R.fail('失败：' + e.message);
     }
   }
 }

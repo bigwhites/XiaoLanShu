@@ -2,10 +2,13 @@ logging:
   level:
     com.baomidou: debug
     com.ricky: debug
-  file:
-    name: userInfo.log
-    path: /logs
+#  file:
+#    name: userInfo.log
+#    path: /logs
 spring:
+  banner:
+    charset: UTF-8
+    location: classpath:banner.txt
   threads:
     virtual:
       enabled: true

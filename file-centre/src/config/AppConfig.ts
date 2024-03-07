@@ -4,3 +4,5 @@ export const FILE_ROOT = `C:\\Users\\Public\\FILES_XIAO_LAN_SHU`;
 
 export const STATIC_ROUTE = `/static`;
 export const UPLOAD_MAX_IMG_SIZE = 200 * 1024;
+
+export const REDIS_KEY = 'files-token';

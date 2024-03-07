@@ -7,6 +7,7 @@ import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import com.ricky.apicommon.XiaoLanShuException;
 import com.ricky.apicommon.blogServer.DTO.UploadReqDTO;
+import com.ricky.apicommon.blogServer.service.IBlogService;
 import com.ricky.apicommon.blogServer.service.IFileUploadService;
 import com.ricky.apicommon.constant.Constant;
 import com.ricky.apicommon.userInfo.DTO.UserDTO;
@@ -14,7 +15,6 @@ import com.ricky.apicommon.userInfo.VO.UpdateUserVo;
 import com.ricky.apicommon.userInfo.entity.UserBasic;
 import com.ricky.apicommon.userInfo.entity.UserDetail;
 import com.ricky.apicommon.userInfo.service.IUserDetailService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ricky.userinfo.constant.DefaultValue;
 
 import com.ricky.userinfo.mapper.UserDetailMapper;
@@ -23,9 +23,11 @@ import jakarta.annotation.Resource;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.task.VirtualThreadTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * <p>
@@ -51,9 +53,15 @@ public class UserDetailServiceImpl extends MPJBaseServiceImpl<UserDetailMapper, 
     @DubboReference(check = false)
     IFileUploadService fileUploadService;
 
+    @DubboReference(check = false)
+    IBlogService blogService;
+
+    @Resource(name = "tinyPool")
+    VirtualThreadTaskExecutor executor;
+
 
     //TODO 加入 cache机制
-    public UserDTO getUserDetail(String uuid) {
+    public UserDTO getUserDetail(String uuid) throws Exception {
         UserDTO userDTO = userDetailMapper.selectJoinOne(
                 UserDTO.class,
                 new MPJLambdaWrapper<UserDetail>().selectAll(UserDetail.class)
@@ -63,11 +71,11 @@ public class UserDetailServiceImpl extends MPJBaseServiceImpl<UserDetailMapper, 
                         .eq(UserDetail::getUuid, uuid)
 
         );
-
         if (userDTO == null) {
             throw new XiaoLanShuException("无该用户");
         }
-        log.info("userDto:{}", userDTO);
+        Future<Long> blogCntFuture = executor.submit(() -> blogService.getUserBlogCntById(uuid));
+        log.debug("userDto:{}", userDTO);
         userDTO = followService.checkFoFansInRedis(userDTO);
         if (userDTO.uAbout == null) {
             userDTO.uAbout = defaultValue.getUserAbout();
@@ -98,6 +106,7 @@ public class UserDetailServiceImpl extends MPJBaseServiceImpl<UserDetailMapper, 
             sbb.append("/").append(defaultValue.getAvatar());
         }
         userDTO.cover = sbb.toString();
+        userDTO.blogCount = blogCntFuture.get();
         return userDTO;
     }
 
@@ -125,7 +134,7 @@ public class UserDetailServiceImpl extends MPJBaseServiceImpl<UserDetailMapper, 
                 userDetail.setUAvatar(reqDTO.fileName);
             }
             if (!StringUtils.isEmpty(oriName)) {
-                fileUploadService.deleteoneFile(path, oriName); //rpc调用
+                fileUploadService.deleteOneFile(path, oriName); //rpc调用
             }
             super.getBaseMapper().updateById(userDetail);
         });
@@ -137,7 +146,6 @@ public class UserDetailServiceImpl extends MPJBaseServiceImpl<UserDetailMapper, 
     public void updateUser(UpdateUserVo userVo) {
         boolean exists = userDetailMapper.exists(
                 new LambdaQueryWrapper<UserDetail>().eq(UserDetail::getUuid, userVo.uuid));
-//        UserDetail byId = userDetailMapper.selectById(userDetail.getUuid());
         if (!exists) {
             throw new XiaoLanShuException("没有该用户");
         }
@@ -147,13 +155,13 @@ public class UserDetailServiceImpl extends MPJBaseServiceImpl<UserDetailMapper, 
             wrapper.set(UserDetail::getNickname, userVo.nickname);
         }
         if (userVo.birthday != null) {
-            wrapper.set(UserDetail::getBirthday,userVo.birthday);
+            wrapper.set(UserDetail::getBirthday, userVo.birthday);
         }
         if (!StringUtils.isEmpty(userVo.uSex)) {
             wrapper.set(UserDetail::getUSex, userVo.uSex);
         }
         if (!StringUtils.isEmpty(userVo.uAbout)) {
-            wrapper.set(UserDetail::getUAbout,userVo.uAbout);
+            wrapper.set(UserDetail::getUAbout, userVo.uAbout);
         }
         if (userDetailMapper.update(null, wrapper) != 1) {
             throw new XiaoLanShuException("更新失败");

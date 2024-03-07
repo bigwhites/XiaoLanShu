@@ -1,13 +1,9 @@
 package com.ricky.apicommon.blogServer.VO;
 
 import com.ricky.apicommon.DefalutGroup;
-import com.ricky.apicommon.blogServer.entity.BlogImage;
-import jakarta.validation.constraints.*;
-
-//import javax.validation.constraints.Max;
-//import javax.validation.constraints.Min;
-//import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 
 public class NewBlogVO {

@@ -5,6 +5,8 @@ import { Logger } from 'winston';
 import * as fs from 'fs';
 import { FileDto } from './DTO/FileDto';
 import * as AppConfig from '../config/AppConfig';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import { Redis } from 'ioredis';
 
 @Injectable()
 export class FileUploadService {
@@ -12,6 +14,7 @@ export class FileUploadService {
 
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    @InjectRedis() private redisClient: Redis,
   ) {}
 
   public async connectToQueue(): Promise<void> {
@@ -46,7 +49,8 @@ export class FileUploadService {
 
           if (fs.existsSync(filePath)) {
             this.logger.info(`文件${filePath}存在`);
-            fs.unlink(filePath, ackMessage);
+            fs.unlinkSync(filePath);
+            ackMessage();
           }
         }
       },
@@ -58,6 +62,36 @@ export class FileUploadService {
     if (this.channel && this.channel.connection) {
       this.channel.close();
       this.channel.connection.close();
+    }
+  }
+
+  async uploadMultiple(files: Array<Express.Multer.File>, redisKey: string) {
+    if ((await this.redisClient.get('usedFT:' + redisKey)) == '1') {
+      throw new Error('请勿重复上传');
+    }
+    const fileNamesList: string[] = await this.redisClient.lrange(
+      redisKey,
+      0,
+      -1,
+    );
+    if (fileNamesList === null || fileNamesList.length === 0) {
+      throw new Error('上传未经许可的文件');
+    }
+    const path = AppConfig.FILE_ROOT + '\\' + fileNamesList[0];
+    if (!fs.existsSync(path)) {
+      fs.mkdirSync(path, { recursive: true });
+      this.logger.info('创建文件夹成功');
+    }
+    let i: number = 1;
+    for (const file of files) {
+      const fileName = path + '\\' + fileNamesList[i];
+      ++i;
+      fs.writeFile(fileName, file.buffer, (err) => {
+        this.redisClient.set('usedFT:' + redisKey, '1', 'EX', 60 * 5);
+        if (err) {
+          throw new Error('err');
+        }
+      });
     }
   }
 }

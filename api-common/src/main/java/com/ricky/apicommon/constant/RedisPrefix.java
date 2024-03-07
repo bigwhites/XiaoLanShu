@@ -5,6 +5,8 @@ public interface RedisPrefix {
 
     String FILENAME = "FILENAME:";
 
+    String FILENAMES = "FNAMES:";
+
     String FILEPATH = "FILEPATH:";  //根目录下的一级目录
 
     String FOLLOW_SET = "FOLOWSET:"; //关注集合

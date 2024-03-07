@@ -5,4 +5,5 @@ import com.github.yulichang.base.MPJBaseService;
 import com.ricky.apicommon.userInfo.entity.UserBasic;
 
 public interface IUserBasicService extends MPJBaseService<UserBasic> {
+    Integer userExistByUuid(String uuid);
 }

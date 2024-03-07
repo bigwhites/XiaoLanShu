@@ -25,14 +25,15 @@ public class Blog {
 
     public String content;
 
-    public Long coverId;
+    public String coverFileName;
 
-    public Long getCoverId() {
-        return coverId;
+
+    public String getCoverFileName() {
+        return coverFileName;
     }
 
-    public void setCoverId(Long coverId) {
-        this.coverId = coverId;
+    public void setCoverFileName(String coverFileName) {
+        this.coverFileName = coverFileName;
     }
 
     public Long getId() {

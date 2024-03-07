@@ -43,9 +43,7 @@ public class FollowSaveTask {
     @Async("tinyPool")
     @Scheduled(fixedDelay = 1000 * 20)
     public void FollowFromRedis2Db() {
-        log.debug("follow invoke");
         followService.cacheFollowList2DB();
-        log.debug("follow task quit");
     }
 
 
