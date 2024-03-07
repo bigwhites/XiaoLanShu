@@ -53,7 +53,7 @@ export class FileUploadController {
       }),
     }),
   )
-  @HttpCode(200) //TODO 解决存储泄露
+  @HttpCode(200)
   uploadOne(@UploadedFile() file: Express.Multer.File): R {
     try {
       this.logger.info(file);

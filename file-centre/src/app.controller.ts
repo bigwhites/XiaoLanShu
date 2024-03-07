@@ -12,8 +12,8 @@ export class AppController {
 
   @Get()
   getHello(): string {
-    console.log('console is work');
-    this.logger.error('ssss');
+    // console.log('console is work');
+    // this.logger.error('ssss');
     return this.appService.getHello();
   }
 }
