@@ -4,6 +4,9 @@ server:
     enabled: true
 
 spring:
+  banner:
+    charset: UTF-8
+    location: classpath:banner.txt
   threads:
     virtual:
       enabled: true

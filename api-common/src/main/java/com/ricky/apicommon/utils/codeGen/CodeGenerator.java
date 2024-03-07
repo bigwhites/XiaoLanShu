@@ -15,7 +15,7 @@ public class CodeGenerator {
         Scanner scanner = new Scanner(System.in);
         System.out.print("input table name:");
         String tName = scanner.next();
-        FastAutoGenerator.create("jdbc:postgresql://localhost:5433/user_info?useSSL=false", "postgres", "123456")
+        FastAutoGenerator.create("jdbc:postgresql://localhost:5433/blog_server?useSSL=false", "postgres", "123456")
                 // 全局配置s
                 .globalConfig(builder -> {
                     builder.author("bigwhites") // 设置作者
