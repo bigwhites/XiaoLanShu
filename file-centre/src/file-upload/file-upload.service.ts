@@ -94,4 +94,37 @@ export class FileUploadService {
       });
     }
   }
+
+  async uploadFilesSingle(
+    file: Express.Multer.File,
+    redisKey: string,
+    index: number,
+  ) {
+    if ((await this.redisClient.get('usedFT:' + redisKey)) == '1') {
+      throw new Error('请勿重复上传');
+    }
+    const fileCount = (await this.redisClient.llen(redisKey)) - 1;
+    if (fileCount < index) {
+      throw new Error('上传未经许可的文件');
+    }
+    let filePath: string = AppConfig.FILE_ROOT + '\\';
+    filePath += (await this.redisClient.lrange(redisKey, 0, 0))[0];
+    filePath += '\\';
+
+    const fileName: string = (
+      await this.redisClient.lrange(redisKey, index, index)
+    )[0];
+    //index从1 开始计数，0为路径
+    if (!fs.existsSync(filePath)) {
+      fs.mkdirSync(filePath, { recursive: true });
+    }
+    fs.writeFile(filePath + fileName, file.buffer, (err) => {
+      if (err) {
+        throw new Error('err');
+      }
+      if (index === fileCount) {
+        this.redisClient.set('usedFT:' + redisKey, '1', 'EX', 60 * 5);
+      }
+    });
+  }
 }

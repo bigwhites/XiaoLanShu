@@ -17,7 +17,6 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 import { checkOrMkDir } from '../utils/dir-utils';
 import { FileUploadService } from './file-upload.service';
-import e from 'express';
 
 @Controller('fileUpload')
 export class FileUploadController {
@@ -81,6 +80,29 @@ export class FileUploadController {
         .catch((e) => {
           throw new Error(e);
         });
+      return R.success('上传成功!');
+    } catch (e: any) {
+      return R.fail('失败：' + e.message);
+    }
+  }
+
+  // 多次循环调用本api上传多个文件，为了解决uni-app不能一次上传多文件而提供的接口
+  @Post('multiple/single')
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFilesBySingle(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() request: Request,
+  ): Promise<R> {
+    try {
+      const index: number = Number(
+        request.headers[AppConfig.FILES_INDEX].toString(),
+      );
+      await this.fileUploadService.uploadFilesSingle(
+        file,
+        request.headers[AppConfig.REDIS_KEY].toString(),
+        index,
+      );
       return R.success('上传成功!');
     } catch (e: any) {
       return R.fail('失败：' + e.message);
