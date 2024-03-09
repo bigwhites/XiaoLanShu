@@ -4,7 +4,7 @@ server:
     enabled: true
 logging:
   level:
-#    com.baomidou: debug
+    com.baomidou: debug
     com.ricky: debug
 spring:
   banner:
@@ -144,3 +144,7 @@ spring:
 #      # ########## 连接池监控配置-结束 ##########  http://localhost:8080/druid/index.html
 
 
+#mybatis-plus配置控制台打印完整带参数SQL语句
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

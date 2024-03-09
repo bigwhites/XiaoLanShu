@@ -1,6 +1,8 @@
 package com.ricky.blogserver.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.ricky.apicommon.DefalutGroup;
+import com.ricky.apicommon.blogServer.DTO.BlogBasicDTO;
 import com.ricky.apicommon.blogServer.DTO.UploadReqDTO;
 import com.ricky.apicommon.blogServer.VO.NewBlogVO;
 import com.ricky.apicommon.utils.result.R;
@@ -8,10 +10,7 @@ import com.ricky.apicommon.utils.result.ResultFactory;
 import com.ricky.blogserver.serviceImpl.BlogServiceImpl;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 
@@ -34,5 +33,14 @@ public class BlogController {
     public R<UploadReqDTO> publish(@RequestBody @Validated(value = {DefalutGroup.class}) NewBlogVO newBlogVO) {
         UploadReqDTO uploadReqDTO = blogService.publishBlog(newBlogVO);
         return ResultFactory.success(uploadReqDTO);
+    }
+
+    @PostMapping("/getByPid/{page}/{pageSize}/{pubUuid}")
+    public R<IPage<BlogBasicDTO>> getBlogPage(
+                                              @PathVariable("page") Integer page,
+                                              @PathVariable("pageSize") Integer pageSize,
+                                              @PathVariable("pubUuid") String uuid
+    ) {
+        return ResultFactory.success(blogService.getBlogPage(uuid, page, pageSize));
     }
 }

@@ -2,6 +2,7 @@ package com.ricky.apicommon.blogServer.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
@@ -14,7 +15,7 @@ import java.time.LocalDate;
  * @since 2024-03-07
  */
 @TableName("blog_status")
-public class BlogStatus {
+public class BlogStatus implements Serializable {
 
     @TableId(value = "id", type = IdType.AUTO)
     public Long id;

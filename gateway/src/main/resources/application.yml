@@ -17,6 +17,13 @@ spring:
           filters:
             - StripPrefix=3
 
+        - id: blog_server
+          uri: http://localhost:9999/
+          predicates:
+            - Path=/api/v1/blogServer/**
+          filters:
+            - StripPrefix=3
+
         - id: message_centre
           uri: http://localhost:3000/
           predicates:

@@ -2,6 +2,7 @@ package com.ricky.apicommon.blogServer.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 /**
@@ -13,7 +14,7 @@ import java.time.LocalDate;
  * @since 2024-03-07
  */
 @TableName("blog_image")
-public class BlogImage {
+public class BlogImage implements Serializable {
 
     @TableId(value = "id", type = IdType.AUTO)
     public Long id;
@@ -23,19 +24,23 @@ public class BlogImage {
     public LocalDate createDate;
 
     public Long blogId;
-    public Short sort;
 
-    public BlogImage(String fileName, Long blogId, Short sort) {
+    public Integer sort;
+
+    public BlogImage() {
+    }
+
+    public BlogImage(String fileName, Long blogId, Integer sort) {
         this.fileName = fileName;
         this.blogId = blogId;
         this.sort = sort;
     }
 
-    public Short getSort() {
+    public Integer getSort() {
         return sort;
     }
 
-    public void setSort(Short sort) {
+    public void setSort(Integer sort) {
         this.sort = sort;
     }
 
