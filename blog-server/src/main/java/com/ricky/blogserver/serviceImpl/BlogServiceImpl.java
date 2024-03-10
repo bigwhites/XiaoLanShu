@@ -8,19 +8,21 @@ import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import com.ricky.apicommon.XiaoLanShuException;
 import com.ricky.apicommon.blogServer.DTO.BlogBasicDTO;
+import com.ricky.apicommon.blogServer.DTO.NoteDto;
 import com.ricky.apicommon.blogServer.DTO.UploadReqDTO;
 import com.ricky.apicommon.blogServer.VO.NewBlogVO;
+import com.ricky.apicommon.blogServer.VO.NoteUserVO;
 import com.ricky.apicommon.blogServer.entity.Blog;
 import com.ricky.apicommon.blogServer.entity.BlogImage;
 import com.ricky.apicommon.blogServer.entity.BlogStatus;
+import com.ricky.apicommon.blogServer.entity.BlogView;
 import com.ricky.apicommon.blogServer.service.IBlogService;
-import com.ricky.apicommon.constant.Constant;
 import com.ricky.apicommon.userInfo.service.IUserBasicService;
 import com.ricky.blogserver.config.RabbitConfig;
 import com.ricky.blogserver.mapper.BlogMapper;
+import com.ricky.blogserver.mapper.BlogStatusMapper;
 import jakarta.annotation.Resource;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.dubbo.common.utils.CollectionUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
@@ -32,14 +34,15 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * <p>
@@ -69,6 +72,14 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
     StringRedisTemplate stringRedisTemplate;
     @Resource
     RabbitTemplate rabbitTemplate;
+
+    @Resource(name = "tinyPool")
+    VirtualThreadTaskExecutor virtualThreadTaskExecutor;
+    @Resource
+    private BlogViewServiceImpl blogViewService;
+
+    @Resource
+    private BlogStatusMapper blogStatusMapper;
 
     /**
      * @param uuid 发布人的uuid
@@ -134,13 +145,25 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
         return blog.id;
     }
 
+    /**
+     * @param uuid 用户的uuid
+     * @description RPC调用检查用户是否存在
+     * @author Ricky01
+     * @since 2024/3/10
+     **/
+    public void checkUserExist(String uuid) {
+        Integer i = userBasicService.userExistByUuid(uuid);
+        if (i == 0) {
+            throw new XiaoLanShuException("用户不存在");
+        }
+    }
 
     public IPage<BlogBasicDTO> getBlogPage(String pubUuid, int pageNum, int pageSize) {
 
         try (var executors = Executors.newVirtualThreadPerTaskExecutor()) {
 
 
-            IPage<BlogBasicDTO> blogDtos = baseMapper.selectJoinPage(new Page<>(pageNum, pageSize), BlogBasicDTO.class,
+            IPage<BlogBasicDTO> blogDtoPage = baseMapper.selectJoinPage(new Page<>(pageNum, pageSize), BlogBasicDTO.class,
                     new MPJLambdaWrapper<Blog>()
                             .selectAll(Blog.class)
                             .select(BlogStatus::getAgreeCount)
@@ -149,20 +172,18 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
                             .eq(Blog::getPubUuid, pubUuid)
                             .orderByDesc(Blog::getPublishTime)
                             .leftJoin(BlogStatus.class, BlogStatus::getBlogId, Blog::getId));
-            if (blogDtos == null || CollectionUtils.isEmpty(blogDtos.getRecords())) {
+            if (blogDtoPage == null || CollectionUtils.isEmpty(blogDtoPage.getRecords())) {
                 throw new XiaoLanShuException("没有该用户");
             }
             List<Callable<Object>> callables = new ArrayList<>();
-            blogDtos.getRecords().forEach(blog -> {
+            List<BlogBasicDTO> blogDtosList = new ArrayList<>();
+            Lock lock = new ReentrantLock();
+            blogDtoPage.getRecords().forEach(blog -> {
                 callables.add(() -> {
-                    List<BlogImage> blogImages = blogImageService.getBaseMapper().selectList(new MPJLambdaWrapper<BlogImage>().
-                            eq(BlogImage::getBlogId, blog.id).orderByAsc(BlogImage::getSort));
-                    blog.imageList = new ArrayList<>();
-                    blogImages.forEach(blogImage -> {
-                        String fileName = Constant.ROOT_PATH + blogRootPath + "/" + blog.pubUuid + "/" +
-                                blogImage.fileName;
-                        blog.imageList.add(fileName);
-                    });
+                    BlogBasicDTO dto = blogImageService.fillImageList(blog);
+                    lock.lock();
+                    blogDtosList.add(dto);  //由于多线程顺序不一致,需要排序🤫
+                    lock.unlock();
                     return null;
                 });
             });
@@ -170,10 +191,81 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
             for (Future<Object> future : futures) {
                 future.get();
             }
-            return blogDtos;
+            blogDtosList.sort(Comparator.
+                    comparing(BlogBasicDTO::getPublishTime).reversed());
+            blogDtoPage.setRecords(blogDtosList);
+            return blogDtoPage;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * @param id       博客id
+     * @param viewUuid 查看者的uuid
+     * @return 1
+     * @description 获取博客详情
+     * @author Ricky01
+     * @since 2024/3/9
+     **/
+    public NoteDto getByBId(Long id, String viewUuid) throws Exception {
+        // 1检查view 的id是否合法
+        checkUserExist(viewUuid);
+        NoteDto noteDto = new NoteDto();
+        // 查询出博客的基础dto对象
+        BlogBasicDTO blogBasicDTO = baseMapper.selectJoinOne(BlogBasicDTO.class,
+                new MPJLambdaWrapper<Blog>()
+                        .selectAll(Blog.class)
+                        .select(BlogStatus::getAgreeCount)
+                        .select(BlogStatus::getCollectionCount)
+                        .select(BlogStatus::getViewCount)
+                        .eq(Blog::getId, id)
+                        .orderByDesc(Blog::getPublishTime)
+                        .leftJoin(BlogStatus.class, BlogStatus::getBlogId, Blog::getId)
+        );
+
+        /*
+         异步操作：
+         1.得到所有的图片列表
+         2.填充用户是否收藏、点赞过这篇记录  =》 TODO
+         3.得到用户的详细信息，包括是否关注(RPC)
+         4  增加浏览记录 如果已经看过则无需操作，没看过就增加一条浏览记录
+         */
+
+        Future<BlogBasicDTO> basicDTOFuture =
+                virtualThreadTaskExecutor.submit(() -> blogImageService.fillImageList(blogBasicDTO));
+
+
+        NoteUserVO noteUser = userBasicService.getNoteUser(blogBasicDTO.pubUuid, viewUuid); //得到用户信息
+        noteDto.nickname = noteUser.nickname;
+        noteDto.userName = noteUser.userName;
+        noteDto.uAvatar = noteUser.uAvatar;
+        noteDto.fansCount = noteUser.fansCount;
+        noteDto.isFollow = noteUser.isFollow;
+
+        BlogBasicDTO blogBasicWithImage = basicDTOFuture.get();
+        noteDto.basicInfo = blogBasicWithImage;
+
+        Future<Void> browseCntFuture = virtualThreadTaskExecutor.submit(() -> {  //该任务无需阻塞，与用户无关
+            boolean exists = blogViewService.exists(
+                    new LambdaQueryWrapper<BlogView>()
+                            .eq(BlogView::getBlogId, blogBasicDTO.id)
+                            .eq(BlogView::getViewUuid, viewUuid)
+            );
+            if (!exists) {  //新增一条记录，计数器加一
+                blogStatusMapper.incrCountByColName(blogBasicDTO.id, BlogStatusMapper.VIEW_COUNT);
+                BlogView blogView = new BlogView();
+                blogView.fillDefault();
+                blogView.blogId = blogBasicDTO.id;
+                blogView.viewUuid = viewUuid;
+                blogViewService.save(blogView);
+            }
+            return null;
+        });
+
+        return noteDto;
+
+    }
+
 
 }

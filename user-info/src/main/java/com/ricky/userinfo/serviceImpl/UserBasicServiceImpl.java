@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import com.ricky.apicommon.XiaoLanShuException;
+import com.ricky.apicommon.blogServer.VO.NoteUserVO;
 import com.ricky.apicommon.constant.Constant;
 import com.ricky.apicommon.constant.RedisPrefix;
 import com.ricky.apicommon.userInfo.DTO.SearchUserDTO;
@@ -16,6 +17,7 @@ import com.ricky.apicommon.userInfo.service.IUserBasicService;
 import com.ricky.apicommon.utils.JwtUtil;
 import com.ricky.apicommon.utils.TokenRecord;
 import com.ricky.userinfo.constant.DefaultValue;
+import com.ricky.userinfo.constant.FollowStatusEnum;
 import com.ricky.userinfo.mapper.UserBasicMapper;
 import com.ricky.userinfo.mapper.UserDetailMapper;
 import com.ricky.userinfo.utils.JedisUtils;
@@ -28,6 +30,7 @@ import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.VirtualThreadTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import redis.clients.jedis.Jedis;
@@ -36,6 +39,8 @@ import redis.clients.jedis.Jedis;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * <p>
@@ -52,8 +57,9 @@ public class UserBasicServiceImpl extends MPJBaseServiceImpl<UserBasicMapper, Us
     @Autowired
     JedisUtils jedisUtils;
 
+
     @Resource
-    UserDetailMapper userDetailMapper;
+    UserDetailServiceImpl userDetailService;
 
     @Resource
     UserBasicMapper userBasicMapper;
@@ -63,6 +69,9 @@ public class UserBasicServiceImpl extends MPJBaseServiceImpl<UserBasicMapper, Us
 
     @Resource
     private FollowServiceImpl followService;
+
+    @Resource(name = "tinyPool")
+    VirtualThreadTaskExecutor executor;
 
 
     final private Logger log = LoggerFactory.getLogger(UserBasicServiceImpl.class);
@@ -110,7 +119,7 @@ public class UserBasicServiceImpl extends MPJBaseServiceImpl<UserBasicMapper, Us
                     UserDetail userDetail = new UserDetail(userBasic.getUuid());
                     userDetail.setFollowCount(0);
                     userDetail.setFansCount(0);
-                    userDetailMapper.insert(userDetail);
+                    userDetailService.getBaseMapper().insert(userDetail);
                     break;
                 }
                 cnt++;
@@ -197,7 +206,7 @@ public class UserBasicServiceImpl extends MPJBaseServiceImpl<UserBasicMapper, Us
                 userDTOs.add(uniUser);
             }
         } else {   //根据nickname搜索  在uDetail中搜索
-            userDTOs = userDetailMapper.selectJoinList(SearchUserDTO.class,
+            userDTOs = userDetailService.getBaseMapper().selectJoinList(SearchUserDTO.class,
                     new MPJLambdaWrapper<UserDetail>().selectAll(UserDetail.class)
                             .select(UserBasic::getUserName)
                             .innerJoin(UserBasic.class, UserBasic::getUuid, UserDetail::getUuid)
@@ -235,4 +244,42 @@ public class UserBasicServiceImpl extends MPJBaseServiceImpl<UserBasicMapper, Us
                 new LambdaQueryWrapper<UserBasic>().eq(UserBasic::getUuid, uuid));
         return exists ? 1 : 0;
     }
+
+    @Override
+    public NoteUserVO getNoteUser(String uuid, String viewId) {
+
+        Future<NoteUserVO> voFuture = executor.submit(() ->
+                userBasicMapper.selectJoinOne(NoteUserVO.class,  //查询是用户的信息
+                        new MPJLambdaWrapper<UserBasic>()
+                                .select(UserBasic::getUserName)
+                                .select(UserDetail::getUAvatar)
+                                .select(UserDetail::getNickname)
+                                .select(UserDetail::getFansCount)
+                                .innerJoin(UserDetail.class, UserDetail::getUuid, UserBasic::getUuid)
+                                .eq(UserBasic::getUuid, uuid))
+        );
+        boolean isFollow = followService.checkFollow(viewId, uuid).isFollow();
+        try {
+            NoteUserVO userVO = voFuture.get();
+            userVO.isFollow = isFollow;
+            userVO.uAvatar = userDetailService.avatarFill(userVO.uAvatar);
+            return userVO;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * @param uuids 用户uuid的list
+     * @return 查询完成后的user对象
+     * @description 查询笔记发布人的信息
+     * @author Ricky01
+     * @since 2024/3/10
+     **/
+    @Override
+    public List<SearchUserDTO> getNotePublisherInfo(List<String> uuids) {
+
+        return null;
+    }
+
 }

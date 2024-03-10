@@ -1,8 +1,9 @@
 package com.ricky.apicommon.userInfo.DTO;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class SearchUserDTO {
+public class SearchUserDTO implements Serializable {
     public String userName;
 
     public String uuid;

@@ -21,12 +21,12 @@ import com.ricky.userinfo.mapper.UserDetailMapper;
 import jakarta.annotation.Resource;
 //import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -38,7 +38,6 @@ import java.util.concurrent.Future;
  * @since 2024-02-27
  */
 @Service
-//@Slf4j
 public class UserDetailServiceImpl extends MPJBaseServiceImpl<UserDetailMapper, UserDetail> implements IUserDetailService {
 
     public final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -87,16 +86,7 @@ public class UserDetailServiceImpl extends MPJBaseServiceImpl<UserDetailMapper, 
             userDTO.nickname = defaultValue.getUserNickname();
         }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(Constant.ROOT_PATH);
-        String uAvatar = userDTO.uAvatar;
-        sb.append(defaultValue.getAvatarPrefix()).append("/");
-        if (!StringUtils.isEmpty(uAvatar)) {
-            sb.append(uAvatar);
-        } else {
-            sb.append(defaultValue.getAvatar());
-        }
-        userDTO.uAvatar = sb.toString();
+        userDTO.uAvatar = avatarFill(userDTO.uAvatar);
 
         StringBuilder sbb = new StringBuilder();
         sbb.append(Constant.ROOT_PATH).append(defaultValue.getCoverPrefix());
@@ -108,6 +98,18 @@ public class UserDetailServiceImpl extends MPJBaseServiceImpl<UserDetailMapper, 
         userDTO.cover = sbb.toString();
         userDTO.blogCount = blogCntFuture.get();
         return userDTO;
+    }
+
+    public String avatarFill(String uAvatar) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(Constant.ROOT_PATH);
+        sb.append(defaultValue.getAvatarPrefix()).append("/");
+        if (!StringUtils.isEmpty(uAvatar)) {
+            sb.append(uAvatar);
+        } else {
+            sb.append(defaultValue.getAvatar());
+        }
+        return sb.toString();
     }
 
     public UploadReqDTO updateCoverOrAvaTar(String uuid, String oriFileName, String type) throws Exception {

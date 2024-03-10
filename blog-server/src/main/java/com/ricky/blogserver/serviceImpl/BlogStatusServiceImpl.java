@@ -1,5 +1,6 @@
 package com.ricky.blogserver.serviceImpl;
 
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.ricky.apicommon.blogServer.entity.BlogStatus;
 import com.ricky.blogserver.mapper.BlogStatusMapper;
@@ -32,3 +33,4 @@ public class BlogStatusServiceImpl extends MPJBaseServiceImpl<BlogStatusMapper, 
     }
 
 }
+

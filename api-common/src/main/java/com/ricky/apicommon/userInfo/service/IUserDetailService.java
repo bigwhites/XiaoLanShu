@@ -1,6 +1,7 @@
 package com.ricky.apicommon.userInfo.service;
 
 import com.github.yulichang.base.MPJBaseService;
+import com.ricky.apicommon.userInfo.DTO.UserDTO;
 import com.ricky.apicommon.userInfo.entity.UserDetail;
 import com.baomidou.mybatisplus.extension.service.IService;
 
