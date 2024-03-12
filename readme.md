@@ -2,8 +2,8 @@
 
 ## 项目概述
 
-    小蓝书项目是模仿小红书的个人项目，目前仍在开发过程中，需要查看最新代码可以切换dev分支。
-    一个基于微服务架构的前后端分离系统，前端基于Uniapp，故可以在移动端全平台使用（后期可能会使用vue来编写PC端）
+小蓝书项目是模仿小红书的个人项目，目前仍在开发过程中，需要查看最新代码可以切换dev分支。    
+一个基于微服务架构的前后端分离系统，前端基于Uniapp，故可以在移动端全平台使用（后期可能会使用vue来编写PC端）
 
 ...
 
@@ -27,9 +27,10 @@
 | nacos                | 2.2.3       | 分布式配置、注册中心    |
 | MySQL                | 8.0.30      | nacos的数据库     |
 | RabbitMQ             | 3.12.13     | 消息中间件         |
+| Elasticsearch        | 8.0.14      | 全文检索          |
 | Dubbo                | 3.3.0-Beta1 | RPC框架         |
 | MyBatis Plus         | 3.5.5       | ORM框架         |
-| MyBatis Plus Join    | -           | 连表查询插件        |
+| MyBatis Plus Join    | 1.4.10      | 连表查询插件        |
 | PostgresSQL          | 16.2        | 数据库           |
 | JDK                  | 21          | 解释器（为了支持虚拟线程） |
 | Maven                | -           | 构建工具          |
@@ -54,7 +55,7 @@
 | PostgresSQL(master) | 5433                    | 主数据库           |
 | PostgresSQL(slave1) | 5434                    | 从数据库1          |
 | PostgresSQL(slave2) | 5435                    | 主数据库2          |
-| PostgresSQL(slave2) | 5435                    | 主数据库2          |
+| Elasticsearch       | 9200                    | 搜索引擎           |                 
 | rabbitmq            | 5672、15672              | 消息队列           |
 | nacos               | 7848、8848<br/>9848、9849 | 分布式配置、注册中心     |
 | MySQL               | 3326                    | nacos数据库       |

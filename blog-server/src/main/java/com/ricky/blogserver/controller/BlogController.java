@@ -13,6 +13,7 @@ import com.ricky.apicommon.utils.result.ResultFactory;
 import com.ricky.blogserver.serviceImpl.BlogServiceImpl;
 import com.ricky.blogserver.serviceImpl.BlogViewServiceImpl;
 import jakarta.annotation.Resource;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,9 @@ public class BlogController {
     @Resource
     BlogServiceImpl blogService;
 
+    @Resource
+    ElasticsearchTemplate elasticsearchTemplate;
+
     /**
      * @param newBlogVO 提供新内容的信息
      * @return 返回成功后的token
@@ -39,6 +43,23 @@ public class BlogController {
     public R<UploadReqDTO> publish(@RequestBody @Validated(value = {DefalutGroup.class}) NewBlogVO newBlogVO) {
         UploadReqDTO uploadReqDTO = blogService.publishBlog(newBlogVO);
         return ResultFactory.success(uploadReqDTO);
+    }
+
+    /**
+     * @param page     当前页数，本项目中与mp保持一致，页数均从1开始
+     * @param pageSize 分页大小
+     * @return 分页对象
+     * @description
+     * @author Ricky01
+     * @since 2024/3/12
+     **/
+    @GetMapping("/getNewByPage")
+    public R<Page<NoteCoverDTO>> getNewByPage(
+            @RequestParam("page") Integer page,
+            @RequestParam("pageSize") Integer pageSize
+    ) {
+        Page<NoteCoverDTO> newBlogByPage = blogService.getNewBlogByPage(page, pageSize);
+        return ResultFactory.success(newBlogByPage);
     }
 
     /**
@@ -68,8 +89,8 @@ public class BlogController {
      * @author Ricky01
      * @since 2024/3/10
      **/
-    @GetMapping("/getByPid/{page}/{pageSize}/{viewUuid}")
-    public R<Object> getViewHistoryPage(
+    @GetMapping("/getHistoryByVId/{page}/{pageSize}/{viewUuid}")
+    public R<Page<NoteCoverDTO>> getViewHistoryPage(
             @PathVariable("page") Integer page,
             @PathVariable("pageSize") Integer pageSize,
             @PathVariable("viewUuid") String uuid
@@ -93,5 +114,10 @@ public class BlogController {
     public R<NoteDto> getNoteByBId(@RequestParam("blogId") Long id,
                                    @RequestParam("viewUuid") String viewUuid) throws Exception {
         return ResultFactory.success(blogService.getByBId(id, viewUuid));
+    }
+
+    @GetMapping("/test")
+    public R<String> test() {
+        return ResultFactory.success("test");
     }
 }

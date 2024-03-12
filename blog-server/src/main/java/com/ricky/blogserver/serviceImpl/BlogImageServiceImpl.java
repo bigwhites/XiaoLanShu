@@ -47,4 +47,8 @@ public class BlogImageServiceImpl extends MPJBaseServiceImpl<BlogImageMapper, Bl
         return blogBasicDTO;
     }
 
+    public String fillImagePath(String fileName, String pubUuid) {
+        return Constant.ROOT_PATH + blogRootPath + "/" + pubUuid + "/" + fileName;
+    }
+
 }

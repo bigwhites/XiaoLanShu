@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
+import com.github.yulichang.interfaces.MPJBaseJoin;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import com.ricky.apicommon.XiaoLanShuException;
 import com.ricky.apicommon.blogServer.VO.NoteUserVO;
@@ -21,6 +22,7 @@ import com.ricky.userinfo.constant.FollowStatusEnum;
 import com.ricky.userinfo.mapper.UserBasicMapper;
 import com.ricky.userinfo.mapper.UserDetailMapper;
 import com.ricky.userinfo.utils.JedisUtils;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.Resource;
 //import javax.annotation.Resource;
 //import lombok.extern.slf4j.Slf4j;
@@ -258,10 +260,14 @@ public class UserBasicServiceImpl extends MPJBaseServiceImpl<UserBasicMapper, Us
                                 .innerJoin(UserDetail.class, UserDetail::getUuid, UserBasic::getUuid)
                                 .eq(UserBasic::getUuid, uuid))
         );
-        boolean isFollow = followService.checkFollow(viewId, uuid).isFollow();
+        Boolean isFollow = null;
+        if (viewId != null) {
+            isFollow =  followService.checkFollow(viewId, uuid).isFollow();
+        }
         try {
             NoteUserVO userVO = voFuture.get();
             userVO.isFollow = isFollow;
+            //用户头像已经添加了根路径前缀，调用方无需处理
             userVO.uAvatar = userDetailService.avatarFill(userVO.uAvatar);
             return userVO;
         } catch (Exception e) {
@@ -278,8 +284,21 @@ public class UserBasicServiceImpl extends MPJBaseServiceImpl<UserBasicMapper, Us
      **/
     @Override
     public List<SearchUserDTO> getNotePublisherInfo(List<String> uuids) {
-
-        return null;
+        List<SearchUserDTO> userDTOS = new ArrayList<>();
+        uuids.forEach(uuid -> {
+            userDTOS.add(
+                    userBasicMapper.selectJoinOne(SearchUserDTO.class, new MPJLambdaWrapper<UserBasic>()
+                            .select(UserBasic::getUserName)
+                            .select(UserDetail::getUAvatar)
+                            .select(UserDetail::getNickname)
+                            .innerJoin(UserDetail.class, UserDetail::getUuid, UserBasic::getUuid)
+                            .eq(UserBasic::getUuid, uuid)
+                    )
+            );
+        });
+        userDTOS.forEach(userDTO ->  //填充头像的根路径
+                userDTO.uAvatar = userDetailService.avatarFill(userDTO.uAvatar));
+        return userDTOS;
     }
 
 }

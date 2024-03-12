@@ -11,7 +11,7 @@ import java.util.List;
 public interface IUserBasicService extends MPJBaseService<UserBasic> {
     Integer userExistByUuid(String uuid);
 
-    NoteUserVO getNoteUser(String uuid, String viewId);
+    NoteUserVO getNoteUser(String uuid,  String viewId);
 
     List<SearchUserDTO> getNotePublisherInfo(List<String> uuids);
 

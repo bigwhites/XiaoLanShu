@@ -14,5 +14,5 @@ public class NoteUserVO implements Serializable {
     public long fansCount;
 
     //当前用户是否关注
-    public boolean isFollow;
+    public Boolean isFollow;
 }

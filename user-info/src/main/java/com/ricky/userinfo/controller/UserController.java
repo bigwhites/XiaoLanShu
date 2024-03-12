@@ -6,20 +6,14 @@ import com.ricky.apicommon.userInfo.DTO.SearchUserDTO;
 import com.ricky.apicommon.userInfo.DTO.UserDTO;
 import com.ricky.apicommon.userInfo.VO.ChangeFollowVO;
 import com.ricky.apicommon.userInfo.VO.UpdateUserVo;
-import com.ricky.apicommon.userInfo.entity.Follow;
-import com.ricky.apicommon.userInfo.entity.UserDetail;
 import com.ricky.apicommon.utils.result.R;
 import com.ricky.apicommon.utils.result.ResultFactory;
-import com.ricky.userinfo.constant.FollowStatusEnum;
 import com.ricky.userinfo.serviceImpl.FollowServiceImpl;
 import com.ricky.userinfo.serviceImpl.UserBasicServiceImpl;
 import com.ricky.userinfo.serviceImpl.UserDetailServiceImpl;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -91,7 +85,7 @@ public class UserController {
     }
 
     @PostMapping("/isFollow")
-    public R<Boolean> isFoolow(@RequestBody ChangeFollowVO followVO) {
+    public R<Boolean> isFollow(@RequestBody ChangeFollowVO followVO) {
         return ResultFactory.success(
                 followService.checkFollow(
                         followVO.fromUuid(),

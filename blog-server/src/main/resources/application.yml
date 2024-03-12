@@ -7,6 +7,10 @@ logging:
     com.baomidou: debug
     com.ricky: debug
 spring:
+  elasticsearch:
+    uris: [ http://localhost:9200 ]
+#    username: root
+#    password: 123456
   banner:
     charset: UTF-8
     location: classpath:banner.txt
@@ -56,6 +60,8 @@ spring:
       host: 127.0.0.1
       port: 6379
       timeout: 3000
+
+
 
 
   # rabbitmq消息队列配置

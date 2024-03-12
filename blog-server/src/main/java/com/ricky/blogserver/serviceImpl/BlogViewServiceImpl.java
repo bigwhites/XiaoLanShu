@@ -41,6 +41,9 @@ public class BlogViewServiceImpl extends MPJBaseServiceImpl<BlogViewMapper, Blog
     @Resource
     ViewHistoryVServiceImpl viewHistoryVService;
 
+    @Resource
+    BlogImageServiceImpl blogImageService;
+
     /**
      * @param uuid 用户的uuid
      * @description RPC调用检查用户是否存在
@@ -66,7 +69,7 @@ public class BlogViewServiceImpl extends MPJBaseServiceImpl<BlogViewMapper, Blog
         if (CollectionUtils.isNotEmpty(resPage.getRecords())) {
             // 查出发布用户的信息
             List<Boolean> agreeList = new ArrayList<>();
-
+            List<String> pubIdList = new ArrayList<>();
             //并行查询： 1.查看是否点赞 2.发布用户的信息(RPC)
             Future<Void> submit = virtualThreadTaskExecutor.submit(() -> {
                 resPage.getRecords().forEach(noteCoverDTO -> {
@@ -74,7 +77,8 @@ public class BlogViewServiceImpl extends MPJBaseServiceImpl<BlogViewMapper, Blog
                 });
                 return null;
             });
-            List<String> pubIdList = new ArrayList<>();
+            resPage.getRecords().forEach(noteCoverDTO -> pubIdList.add(noteCoverDTO.pubUuid));
+
             //RPC调用较耗时，在主线程完成，完成后虚拟线程的任务也已经完成了
             List<SearchUserDTO> users = userBasicService.getNotePublisherInfo(pubIdList);
             submit.get();
@@ -83,7 +87,8 @@ public class BlogViewServiceImpl extends MPJBaseServiceImpl<BlogViewMapper, Blog
                 newRecords.get(i).isAgree = agreeList.get(i);
                 newRecords.get(i).pubUNickname = users.get(i).nickname;
                 newRecords.get(i).pubUAvatar = users.get(i).uAvatar;
-                newRecords.get(i).pubUuid = users.get(i).uuid;
+                newRecords.get(i).coverFileName = blogImageService.fillImagePath(newRecords.get(i).coverFileName
+                        , newRecords.get(i).pubUuid);
             }
             resPage.setRecords(newRecords);
 

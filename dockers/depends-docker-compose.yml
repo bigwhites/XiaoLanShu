@@ -22,21 +22,20 @@ services:
     command: redis-server --appendonly yes
 
   elasticsearch:
-    image: elasticsearch:7.8.0
+    image: elasticsearch:8.10.4
     container_name: elk-es
 #    restart: always
     environment:
       - "ES_JAVA_OPTS=-Xms768m -Xmx768m"
       # 指定单节点启动
       - discovery.type=single-node
+      - xpack.security.enabled=false
     volumes:
-      - es_data:/usr/share/elasticsearch/data
-      - es_logs:/usr/share/elasticsearch/logs
-      - es_plugins:/usr/share/elasticsearch/plugins
+      - es:/usr/share/elasticsearch
     ports:
       - "9200:9200"
   kibana:
-    image: kibana:7.8.0
+    image: kibana:8.10.4
     container_name: elk-kibana
 #    restart: always
     environment:
@@ -49,9 +48,7 @@ services:
 volumes:
   rabbitmq:
   redis:
-  es_data:
-  es_logs:
-  es_plugins:
+  es:
 networks:
   default:
     driver: bridge

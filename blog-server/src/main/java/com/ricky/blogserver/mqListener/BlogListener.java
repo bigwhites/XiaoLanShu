@@ -4,9 +4,11 @@ import com.alibaba.fastjson2.JSONObject;
 import com.rabbitmq.client.Channel;
 import com.ricky.apicommon.blogServer.DTO.UploadReqDTO;
 import com.ricky.apicommon.blogServer.VO.NewBlogVO;
+import com.ricky.apicommon.blogServer.entity.Blog;
 import com.ricky.blogserver.config.RabbitConfig;
 import com.ricky.blogserver.serviceImpl.BlogServiceImpl;
 import com.ricky.blogserver.serviceImpl.BlogStatusServiceImpl;
+import com.ricky.blogserver.serviceImpl.ElaSearchServiceImpl;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +33,13 @@ public class BlogListener {
 
     @Resource
     BlogStatusServiceImpl blogStatusService;
+    @Resource
+    ElaSearchServiceImpl elaSearchService;
 
     /**
      * @param message 传入的消息
-     * @description 写入新文章消息队列
+     * @description 写入新文章消息队列 <br/>
+     * 将数据同时保存入ES和数据库
      * @author Ricky01
      * @since 2024/3/7
      **/
@@ -48,8 +53,10 @@ public class BlogListener {
         JSONObject jsonObject = JSONObject.parseObject(message);
         NewBlogVO newBlogVo = jsonObject.getObject("newBlogVo", NewBlogVO.class);
         UploadReqDTO uploadReqDTO = jsonObject.getObject("uploadReqDTO", UploadReqDTO.class);
-        Long bId = blogService.writeBlog2DB(newBlogVo, uploadReqDTO);
-        boolean b1 = blogStatusService.addDefaultValue(bId);
+        Blog blog = blogService.writeBlog2DB(newBlogVo, uploadReqDTO);
+        boolean b1 = blogStatusService.addDefaultValue(blog.id);
+        elaSearchService.saveNewBlog2Es(blog);
+
         if (b1) {
             channel.basicAck(deliveryTag, false); //确认消息已处理
         } else {

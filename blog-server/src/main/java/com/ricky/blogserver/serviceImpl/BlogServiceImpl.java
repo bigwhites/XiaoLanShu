@@ -8,6 +8,7 @@ import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import com.ricky.apicommon.XiaoLanShuException;
 import com.ricky.apicommon.blogServer.DTO.BlogBasicDTO;
+import com.ricky.apicommon.blogServer.DTO.NoteCoverDTO;
 import com.ricky.apicommon.blogServer.DTO.NoteDto;
 import com.ricky.apicommon.blogServer.DTO.UploadReqDTO;
 import com.ricky.apicommon.blogServer.VO.NewBlogVO;
@@ -118,7 +119,7 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
      * @since 2024/3/7
      */
     @Transactional
-    public Long writeBlog2DB(NewBlogVO newBlogVo, UploadReqDTO uploadReqDTO) {
+    public Blog writeBlog2DB(NewBlogVO newBlogVo, UploadReqDTO uploadReqDTO) {
         Blog blog = new Blog();
         try {
             BeanUtils.copyProperties(blog, newBlogVo); //将视图对象中的属性复制到实体对象
@@ -142,7 +143,7 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
             ++cnt;
         }
         blogImageService.saveBatch(blogImageList);
-        return blog.id;
+        return blog;
     }
 
     /**
@@ -267,5 +268,36 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
 
     }
 
+    /**
+     * @return 分页查询的笔记封面信息
+     * @params 当前页码和单页最大数
+     * @description 根据发布时间分页查询笔记
+     * @author Ricky01
+     * @since 2024/3/12
+     **/
+    public Page<NoteCoverDTO> getNewBlogByPage(Integer page, Integer pageSize) {
+        Page<NoteCoverDTO> notePage = new Page<>(page, pageSize);
+        Page<NoteCoverDTO> noteCoverDTOPage = baseMapper.selectJoinPage(notePage, NoteCoverDTO.class,
+                new MPJLambdaWrapper<Blog>()
+                        .selectAll(Blog.class)
+                        .select(BlogStatus::getAgreeCount)
+                        .select(BlogStatus::getCollectionCount)
+                        .select(BlogStatus::getViewCount)
+                        .orderByDesc(Blog::getPublishTime)
+                        .leftJoin(BlogStatus.class, BlogStatus::getBlogId, Blog::getId));
+        if ((noteCoverDTOPage != null) && !CollectionUtils.isEmpty(noteCoverDTOPage.getRecords())) {
+            noteCoverDTOPage.getRecords().forEach(noteCoverDTO -> {
+                noteCoverDTO.coverFileName = blogImageService.fillImagePath(noteCoverDTO.coverFileName, noteCoverDTO.pubUuid);
 
+                noteCoverDTO.isAgree = false;
+                //查询出博客对应的发布人的id（RPC）
+                NoteUserVO noteUser = userBasicService.getNoteUser(noteCoverDTO.pubUuid, null);
+                noteCoverDTO.pubUNickname = noteUser.nickname;
+                noteCoverDTO.pubUAvatar = noteUser.uAvatar;
+
+            });
+        }
+        return noteCoverDTOPage;
+
+    }
 }
