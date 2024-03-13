@@ -1,5 +1,6 @@
 package com.ricky.userinfo.serviceImpl;
 
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.yulichang.base.MPJBaseServiceImpl;
@@ -13,6 +14,7 @@ import com.ricky.apicommon.userInfo.DTO.UserDTO;
 import com.ricky.apicommon.userInfo.entity.Follow;
 import com.ricky.apicommon.userInfo.entity.UserDetail;
 import com.ricky.apicommon.userInfo.service.IFollowService;
+import com.ricky.userinfo.config.MailSentRabbitConfig;
 import com.ricky.userinfo.constant.FollowStatusEnum;
 import com.ricky.userinfo.mapper.FollowMapper;
 import com.ricky.userinfo.mapper.UserDetailMapper;
@@ -22,11 +24,13 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.core.task.VirtualThreadTaskExecutor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -44,7 +48,6 @@ import java.util.concurrent.Future;
 @Service
 public class FollowServiceImpl extends MPJBaseServiceImpl<FollowMapper, Follow> implements IFollowService {
 
-
     @Resource
     StringRedisTemplate stringRedisTemplate;
 
@@ -57,6 +60,8 @@ public class FollowServiceImpl extends MPJBaseServiceImpl<FollowMapper, Follow> 
     @Resource(name = "tinyPool")
     VirtualThreadTaskExecutor executor;
 
+    @Resource
+    RabbitTemplate rabbitTemplate;
 
     final private Logger log = LoggerFactory.getLogger(FollowServiceImpl.class);
 
@@ -281,6 +286,11 @@ public class FollowServiceImpl extends MPJBaseServiceImpl<FollowMapper, Follow> 
         }
     }
 
+    /**
+     * @description 将关注消息持久化，并给消息队列发送消息
+     * @author Ricky01
+     * @since 2024/3
+     **/
     @Transactional
     public void cacheFollowList2DB() {
 //        synchronized (this) {
@@ -326,8 +336,11 @@ public class FollowServiceImpl extends MPJBaseServiceImpl<FollowMapper, Follow> 
                             if (CollectionUtils.isNotEmpty(updateIds)) {
                                 List<Follow> follows = new ArrayList<>();
                                 for (var fromId : updateIds) {
-                                    follows.add(new Follow(fromId, uuid));
-//                                    this.save(new Follow(fromId, uuid));
+                                    Follow follow = new Follow(fromId, uuid);
+                                    follows.add(follow);
+                                    rabbitTemplate.convertAndSend(MailSentRabbitConfig.EXCHANGE_FOLLOW,  //向消息中心发送消息
+                                            MailSentRabbitConfig.ROUTE_FOLLOW, JSON.toJSONString(follow));
+//
                                 }
                                 this.saveBatch(follows);
                             }

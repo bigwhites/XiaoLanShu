@@ -7,3 +7,7 @@ export const STATIC_ROUTE = `/static`;
 export const UPLOAD_MAX_IMG_SIZE = 200 * 1024;
 
 export const REDIS_KEY = 'rtoken';
+
+export const REDIS_KEYS = {
+  WEBSOCKET_USERS: 'WSU:',
+};
