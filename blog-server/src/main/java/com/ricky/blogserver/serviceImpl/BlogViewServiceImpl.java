@@ -44,6 +44,8 @@ public class BlogViewServiceImpl extends MPJBaseServiceImpl<BlogViewMapper, Blog
     @Resource
     BlogImageServiceImpl blogImageService;
 
+    @Resource
+    BlogAgreeServiceImpl blogAgreeService;
     /**
      * @param uuid 用户的uuid
      * @description RPC调用检查用户是否存在
@@ -73,7 +75,8 @@ public class BlogViewServiceImpl extends MPJBaseServiceImpl<BlogViewMapper, Blog
             //并行查询： 1.查看是否点赞 2.发布用户的信息(RPC)
             Future<Void> submit = virtualThreadTaskExecutor.submit(() -> {
                 resPage.getRecords().forEach(noteCoverDTO -> {
-                    agreeList.add(false); //TODO  点赞功能还未实现，暂时false
+                    Boolean agree = blogAgreeService.isAgree(noteCoverDTO.blogId, noteCoverDTO.viewUuid);
+                    agreeList.add(agree);;
                 });
                 return null;
             });

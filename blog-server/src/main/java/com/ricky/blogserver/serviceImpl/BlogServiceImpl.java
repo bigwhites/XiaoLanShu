@@ -82,6 +82,9 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
     @Resource
     private BlogStatusMapper blogStatusMapper;
 
+    @Resource
+    BlogAgreeServiceImpl agreeService;
+
     /**
      * @param uuid 发布人的uuid
      * @return 用户的关注数量
@@ -228,7 +231,7 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
         /*
          异步操作：
          1.得到所有的图片列表
-         2.填充用户是否收藏、点赞过这篇记录  =》 TODO
+         2.填充用户是否收藏、点赞过这篇记录  =》 TODO  收藏
          3.得到用户的详细信息，包括是否关注(RPC)
          4  增加浏览记录 如果已经看过则无需操作，没看过就增加一条浏览记录
          */
@@ -263,7 +266,7 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
             }
             return null;
         });
-
+        noteDto.isAgree = this.isAgree(viewUuid, blogBasicDTO.id);
         return noteDto;
 
     }
@@ -289,7 +292,7 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
             noteCoverDTOPage.getRecords().forEach(noteCoverDTO -> {
                 noteCoverDTO.coverFileName = blogImageService.fillImagePath(noteCoverDTO.coverFileName, noteCoverDTO.pubUuid);
 
-                noteCoverDTO.isAgree = false;
+                noteCoverDTO.isAgree = this.isAgree(noteCoverDTO.viewUuid, noteCoverDTO.blogId); //查询是否点赞
                 //查询出博客对应的发布人的id（RPC）
                 NoteUserVO noteUser = userBasicService.getNoteUser(noteCoverDTO.pubUuid, null);
                 noteCoverDTO.pubUNickname = noteUser.nickname;
@@ -300,4 +303,9 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
         return noteCoverDTOPage;
 
     }
+
+    Boolean isAgree(String viewUuid, Long blogId) {
+        return agreeService.isAgree(blogId, viewUuid);
+    }
+
 }

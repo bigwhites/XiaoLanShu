@@ -10,15 +10,22 @@ import com.ricky.apicommon.blogServer.DTO.UploadReqDTO;
 import com.ricky.apicommon.blogServer.VO.NewBlogVO;
 import com.ricky.apicommon.utils.result.R;
 import com.ricky.apicommon.utils.result.ResultFactory;
+import com.ricky.blogserver.serviceImpl.BlogAgreeServiceImpl;
 import com.ricky.blogserver.serviceImpl.BlogServiceImpl;
 import com.ricky.blogserver.serviceImpl.BlogViewServiceImpl;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.annotation.RequestScope;
+
+import java.util.Objects;
 
 @RestController
-
+@RefreshScope
 @RequestMapping("/blog")
 public class BlogController {
 
@@ -30,6 +37,16 @@ public class BlogController {
 
     @Resource
     ElasticsearchTemplate elasticsearchTemplate;
+
+    @Resource
+    private BlogAgreeServiceImpl agreeService;
+
+
+    @Value("${constant.blogOper.collect}")
+    private Integer COLLECT;//2
+    @Value("${constant.blogOper.agree}")
+    private Integer AGREE; //1
+
 
     /**
      * @param newBlogVO 提供新内容的信息
@@ -116,8 +133,32 @@ public class BlogController {
         return ResultFactory.success(blogService.getByBId(id, viewUuid));
     }
 
+    /**
+     * @param viewUuid 进行点赞或收藏的用户
+     * @return 操作后的点赞、收藏状态
+     * @description 点赞或收藏，根据operation进行区分<br/>
+     * 1为点赞，2为收藏
+     * @author Ricky01
+     * @since 2024/3/13
+     **/
+    @GetMapping("/agreeOrCollect/{viewUuid}")
+    public R<Boolean> agreeOrCollect(@RequestParam("blogId") Long id,
+                                     @RequestParam("operation") Integer operation,
+                                     @PathVariable("viewUuid") String viewUuid) {
+        if (Objects.equals(operation, AGREE)) {
+            Boolean b = agreeService.agreeBlogById(id, viewUuid);
+            return ResultFactory.success(b);
+        } else if (Objects.equals(operation, COLLECT)) {
+            // TODO 收藏功能
+            return null;
+        }
+        return ResultFactory.fail();
+    }
+
     @GetMapping("/test")
     public R<String> test() {
         return ResultFactory.success("test");
     }
+
+
 }

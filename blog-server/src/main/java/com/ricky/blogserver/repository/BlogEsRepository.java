@@ -16,4 +16,6 @@ public interface BlogEsRepository extends ElasticsearchRepository<BlogESPojo, Lo
 
     public Page<BlogESPojo> findByTitleContainingOrContentContainingOrderByPublishTimeDesc(
             String titleKeyword, String contentKeyword, Pageable pageable);
+
+//    public void updateBlogESPojoBy
 }

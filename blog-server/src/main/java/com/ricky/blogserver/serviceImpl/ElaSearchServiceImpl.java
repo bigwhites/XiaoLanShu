@@ -1,7 +1,6 @@
 package com.ricky.blogserver.serviceImpl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.ricky.apicommon.blogServer.DTO.BlogBasicDTO;
 import com.ricky.apicommon.blogServer.DTO.NoteCoverDTO;
 import com.ricky.apicommon.blogServer.VO.NoteUserVO;
 import com.ricky.apicommon.blogServer.entity.Blog;
@@ -12,7 +11,6 @@ import com.ricky.blogserver.repository.BlogEsRepository;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
@@ -52,7 +50,7 @@ public class ElaSearchServiceImpl implements IElaSearchService {
             NoteUserVO noteUser = userBasicService.getNoteUser(blogESPojo.pubUuid, null);//RPC
             noteCoverDTO.pubUNickname = noteUser.nickname;
             noteCoverDTO.pubUAvatar = noteUser.uAvatar;
-            noteCoverDTO.isAgree = false;  //TODO  点赞还未实现
+            noteCoverDTO.isAgree = false;  //TODO  接口设计时传参忘传自己是谁了，搞不了
         });
         com.baomidou.mybatisplus.extension.plugins.pagination.Page<NoteCoverDTO> resPage =
 
@@ -80,6 +78,16 @@ public class ElaSearchServiceImpl implements IElaSearchService {
         pojo.agreeCount = 0L;
         BlogESPojo save = blogEsRepository.save(pojo);
         log.debug(save.toString());
+    }
+
+    public void updateAgreeCount(Long id, Long delta) {
+        // 通过 ID 查询文档
+        blogEsRepository.findById(id).ifPresent(document -> {
+            // 更新字段的值
+            document.agreeCount += delta;
+            // 保存更新后的文档
+            blogEsRepository.save(document);
+        });
     }
 
 }
