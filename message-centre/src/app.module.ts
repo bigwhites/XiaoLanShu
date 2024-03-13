@@ -9,6 +9,8 @@ import * as winston from 'winston';
 import 'winston-daily-rotate-file';
 import { RedisCacheModule } from './config/redis-cache.module';
 import { FileUploadModule } from './file-upload/file-upload.module';
+import { MessageModule } from './message/message.module';
+import { WSMessageGateway } from './message/message.gateway';
 ;
 
 @Module({
@@ -35,8 +37,9 @@ import { FileUploadModule } from './file-upload/file-upload.module';
     RedisCacheModule,
     EmailSendSubscriberModule,
     FileUploadModule,
+    MessageModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, WSMessageGateway],
 })
 export class AppModule {}
