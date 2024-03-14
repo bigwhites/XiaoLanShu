@@ -37,10 +37,12 @@
 				<view class="container">
 
 					<ul class="conversation-list" v-if="conversations.length > 0">
-						<li class="conversation-item" :lineLeft="false" v-for="(conversation, key) in conversations" :key="key">
-							<tui-swipe-action :operateWidth="140"  >
+						<li class="conversation-item" :lineLeft="false" v-for="(conversation, key) in conversations"
+							:key="key">
+							<tui-swipe-action :operateWidth="140">
 								<template v-slot:content>
-									<view class="tui-item-box" @click="chat(conversation)"  :style="topList.includes(conversation.userId)?{backgroundColor:'#f1f1f1'}:{backgroundColor:'#fff'}">
+									<view class="tui-item-box" @click="chat(conversation)"
+										:style="topList.includes(conversation.userId)?{backgroundColor:'#f1f1f1'}:{backgroundColor:'#fff'}">
 										<view class="tui-msg-box">
 											<image :src="conversation.data.avatar" class="tui-msg-pic" mode="aspectFill"
 												:lazy-load='true' />
@@ -80,20 +82,23 @@
 										</view>
 										<view class="tui-msg-right">
 											<view class="tui-msg-time">
-												{{ formatDate(conversation.lastMessage.timestamp) }}</view>
+												{{ formatDate(conversation.lastMessage.timestamp) }}
+											</view>
 											<tui-badge type="danger" class="tui-badge"
 												v-if="conversation.unread > 0">{{ conversation.unread }}</tui-badge>
 										</view>
 									</view>
 								</template>
-							
-							    <template v-slot:button>
-							      	<view class="tui-custom-btn_box">
-							      		<view class="tui-custom-btn-top" @click="customBtn(0,conversation)">{{conversation.top ? '取消置顶' : '置顶聊天' }}</view>
-							      		<view class="tui-custom-btn-delete" @click="customBtn(1,conversation)">删除</view>
-							      	</view>
-							      </template>
-							
+
+								<template v-slot:button>
+									<view class="tui-custom-btn_box">
+										<view class="tui-custom-btn-top" @click="customBtn(0,conversation)">
+											{{conversation.top ? '取消置顶' : '置顶聊天' }}
+										</view>
+										<view class="tui-custom-btn-delete" @click="customBtn(1,conversation)">删除</view>
+									</view>
+								</template>
+
 							</tui-swipe-action>
 
 						</li>
@@ -165,8 +170,8 @@
 						background: '#FD3B31'
 					}
 				],
-				
-				topList:[],
+
+				topList: [],
 
 			}
 		},
@@ -191,24 +196,20 @@
 			},
 
 		},
+		created() {
+			this.createWs()
+		},
 
 		onShow() {
-
-			this.createWs()
-
-			this.getUserRecord()
-
-			this.currentUser = uni.getStorageSync('userInfo');
-			getApp().globalData.currentUser = this.currentUser;
-			if (this.goEasy.getConnectionStatus() === 'disconnected') {
-				this.connectGoEasy(); //连接goeasy
+			let cnt = Number(uni.getStorageSync('followCnt'));
+			if (cnt != undefined && cnt != null) {
+				this.record.addFollowCount = cnt;
 			}
-			this.goEasy.im.on(this.GoEasy.IM_EVENT.CONVERSATIONS_UPDATED, this.renderConversations); //监听会话列表变化
-			this.loadConversations(); //加载会话列表
+			// this.createWs()
 		},
 
 		beforeDestroy() {
-			this.goEasy.im.off(this.GoEasy.IM_EVENT.CONVERSATIONS_UPDATED, this.renderConversations);
+			// this.goEasy.im.off(this.GoEasy.IM_EVENT.CONVERSATIONS_UPDATED, this.renderConversations);
 		},
 
 		methods: {
@@ -219,99 +220,57 @@
 			// },
 			//测试结束
 
-			formatDate,
-			connectGoEasy() {
-				uni.showLoading();
-				this.goEasy.connect({
-					id: this.currentUser.id,
-					data: {
-						name: this.currentUser.username,
-						avatar: this.currentUser.avatar
-					},
-					onSuccess: () => {
-						console.log('GoEasy connect successfully.')
-					},
-					onFailed: (error) => {
-						console.log('Failed to connect GoEasy, code:' + error.code + ',error:' + error
-							.content);
-					},
-					onProgress: (attempts) => {
-						console.log('GoEasy is connecting', attempts);
-					}
-				});
-			},
 
-
-			loadConversations() {
-				this.goEasy.im.latestConversations({
-					onSuccess: (result) => {
-						uni.hideLoading();
-						let content = result.content;
-						this.renderConversations(content);
-						this.count = content.unreadTotal;
-
-					},
-					onFailed: (error) => {
-						uni.hideLoading();
-						console.log('获取最新会话列表失败, error:', error);
-					}
-				});
-			},
-
-			renderConversations(content) {
-				this.conversations = content.conversations;
-			},
-			
-			customBtn(index,conversation){
-				let that =this
-				 if(index==0){
-					 let description = conversation.top ? '取消置顶' : '置顶';
-					 this.goEasy.im.topConversation({
-					 	conversation: conversation,
-					 	top: !conversation.top,
-					 	onSuccess: function() {
-					 		uni.showToast({
-					 			title: description + '成功',
-					 			icon: 'none'
-					 		});
-							if(conversation.top){
-								that.topList.splice(that.topList.indexOf(conversation.userId),1)
-							}else{
+			customBtn(index, conversation) {
+				let that = this
+				if (index == 0) {
+					let description = conversation.top ? '取消置顶' : '置顶';
+					this.goEasy.im.topConversation({
+						conversation: conversation,
+						top: !conversation.top,
+						onSuccess: function() {
+							uni.showToast({
+								title: description + '成功',
+								icon: 'none'
+							});
+							if (conversation.top) {
+								that.topList.splice(that.topList.indexOf(conversation.userId), 1)
+							} else {
 								that.topList.push(conversation.userId)
 							}
-					 	},
-					 	onFailed: function(error) {
-					 		console.log(description, '失败：', error);
-					 	}
-					 });
-					 
-				 }else{
-					 uni.showModal({
-					 	content: '确认删除这条会话吗？',
-					 	success: (res) => {
-					 		if (res.confirm) {
-					 			this.goEasy.im.removeConversation({
-					 				conversation: conversation,
-					 				onSuccess: function() {
-					 					console.log('删除会话成功');
-					 				},
-					 				onFailed: function(error) {
-					 					console.log(error);
-					 				},
-					 			});
-					 		} else {
-					 			//this.actionPopup.visible = false;
-					 		}
-					 	},
-					 })
-				 }
+						},
+						onFailed: function(error) {
+							console.log(description, '失败：', error);
+						}
+					});
+
+				} else {
+					uni.showModal({
+						content: '确认删除这条会话吗？',
+						success: (res) => {
+							if (res.confirm) {
+								this.goEasy.im.removeConversation({
+									conversation: conversation,
+									onSuccess: function() {
+										console.log('删除会话成功');
+									},
+									onFailed: function(error) {
+										console.log(error);
+									},
+								});
+							} else {
+								//this.actionPopup.visible = false;
+							}
+						},
+					})
+				}
 			},
-			
+
 
 
 
 			topConversation() { //会话置顶
-				
+
 				let conversation = this.actionPopup.conversation;
 				let description = conversation.top ? '取消置顶' : '置顶';
 				this.goEasy.im.topConversation({
@@ -358,9 +317,9 @@
 					url: path
 				});
 			},
-			
-			
-			
+
+
+
 
 			//-----------------------------------------------------------------------------------------
 
@@ -374,8 +333,8 @@
 					this.triggered = false;
 				}, 300)
 
-				this.getUserRecord()
-				this.loadConversations(); //加载会话列表
+				// this.getUserRecord()
+				// this.loadConversations(); //加载会话列表
 
 			},
 
@@ -388,10 +347,13 @@
 					//清除所有的赞和收藏数量
 				} else if (index == 2) {
 					uni.navigateTo({
-						url: "/pages/message/message-followers/message-followers"
+						url: "/pages/message/message-followers/message-followers",
 					})
 					//清除新关注数量
+					this.record.addFollowCount = 0;
+					uni.setStorageSync('followCnt', '0');
 				} else {
+
 					uni.navigateTo({
 						url: "/pages/message/message-comments/message-comments"
 					})
@@ -433,22 +395,56 @@
 			createWs() {
 
 				let that = this
+				// if (uni.getStorageSync('socketIsOpen') === 'true') {
+				// 	return;
+				// 	console.log('is Opened,skip');
+				// }
+				uni.connectSocket({
+					url: appConfig.WS_API + uni.getStorageSync("userBasic").uuid,
+					header: {
+						'content-type': 'application/json'
+					},
+					protocols: ['protocol1'],
+					method: 'GET',
+					complete: () => {}
+				});
+				uni.onSocketOpen((res) => {
+					console.log('webSocket连接成功');
+					uni.setStorage({
+						key: 'socketIsOpen',
+						data: 'true'
+					})
+				});
+				uni.onSocketMessage((ress) => {
+					let res = JSON.parse(ress.data);
+					console.log(res)
+					if (res.messageType === 2) { //关注
+						this.record.addFollowCount = res.content + Number(uni.getStorageSync('followCnt'));
+						uni.setStorageSync('followCnt', this.record.addFollowCount);
+						plus.push.createMessage('通知', '有新的关注');
+					}
+				})
 
-				socket.connectSocket({
-					// ws://192.168.1.103:8083/platform/ws/
-					url: 'ws://' + appConfig.WS_API + uni.getStorageSync("userInfo").id
-				});
-				socket.onSocketOpen(function(res) {
-					console.log('WebSocket连接已打开！');
-				});
-				socket.onSocketError(function(res) {
-					console.log('WebSocket连接打开失败，请检查！');
-				});
-				socket.onSocketMessage(function(res) {
-					//uni.$emit('messageCount', { 'records': res.data })
-					that.acceptMessage(res.data)
 
-				});
+
+
+				// socket.connectSocket({
+				// 	// ws://192.168.1.103:8083/platform/ws/
+				// 	url: appConfig.WS_API + uni.getStorageSync("userBasic").uuid
+				// });
+				// socket.onSocketOpen(function(res) {
+				// 	console.log('WebSocket连接已打开！');
+				// 	console.log(res)
+				// });
+				// socket.onSocketError(function(res) {
+				// 	console.log('WebSocket连接打开失败，请检查！');
+				// });
+				// socket.onSocketMessage(function(res) {
+				// 	//uni.$emit('messageCount', { 'records': res.data })
+				// 	console.log(res)
+				// 	// that.acceptMessage(res)
+
+				// });
 
 			},
 

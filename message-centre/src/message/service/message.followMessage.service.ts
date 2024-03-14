@@ -14,10 +14,6 @@ export class FollowMessageService {
     return this.userRepository.find();
   }
 
-  // async findOne(id: number): Promise<FollowMessage> {
-  //   return this.userRepository.count(id);
-  // }
-
   async create(data: Partial<FollowMessage>): Promise<FollowMessage> {
     const user = this.userRepository.create(data);
     return this.userRepository.save(user);

@@ -19,3 +19,9 @@ export enum MessageType {
   COLLECTION = 1,
   FOLLOW = 2,
 }
+
+export enum MessageEvent {
+  AGREE = 'agree',
+  COLLECTION = 'collection',
+  FOLLOW = 'follow',
+}

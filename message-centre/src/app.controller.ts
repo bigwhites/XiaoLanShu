@@ -2,7 +2,7 @@ import { Controller, Get, Inject } from '@nestjs/common';
 import { AppService } from './app.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { FollowMessageService } from './message/service/FollowMessageService';
+import { FollowMessageService } from './message/service/message.followMessage.service';
 import { WSMessageGateway } from './message/message.gateway';
 
 @Controller('/hello')
@@ -16,12 +16,13 @@ export class AppController {
 
   @Get()
   async getHello(): Promise<string> {
-    // // console.log('console is work');
-    // // this.logger.error('ssss');
-    // this.wSMessageGateway.sendMessage('djihscokcjs', '/sss');
-    // return this.appService.getHello();
-    const findAll = await this.followMessageService.findAll();
-    console.log(findAll);
+    await this.wSMessageGateway.sendMessage(
+      'send a data',
+      '8325e58a3884b7ec1a08d0636c8f130c',
+      'ssss',
+      2,
+      () => {},
+    );
     // return findAll.toString();
     return 'Hello World!';
   }

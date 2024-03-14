@@ -28,29 +28,29 @@
 			<view v-if="loading" class="img-list">
 				<!-- 重做图片显示模块 -->
 				<view class="img-list-one" v-if="count==1">
-					<img src="/static/images/basic/default.png" width="100%" ></img>
+					<img src="/static/images/basic/default.png" width="100%"></img>
 				</view>
-				
+
 				<view class="img-list-two" v-if="count==2">
-					<image src="/static/images/basic/default.png" mode="widthFix" ></image>
-					<image src="/static/images/basic/default.png" mode="widthFix" ></image>
+					<image src="/static/images/basic/default.png" mode="widthFix"></image>
+					<image src="/static/images/basic/default.png" mode="widthFix"></image>
 				</view>
-				
+
 				<view class="img-list-five" v-if="count==5">
 					<view class="img-list-five-top">
-						<image src="/static/images/basic/default.png" mode="aspectFill" 
+						<image src="/static/images/basic/default.png" mode="aspectFill"
 							style="width: 50%;height: 600rpx;" class="fadeImg"></image>
-						<image src="/static/images/basic/default.png" mode="aspectFill" 
+						<image src="/static/images/basic/default.png" mode="aspectFill"
 							style="width: 50%;height: 600rpx;" class="fadeImg"></image>
 					</view>
 					<view class='img-list-five-down'>
 						<image src="/static/images/basic/default.png" mode="aspectFill"></image>
-						<image src="/static/images/basic/default.png" mode="aspectFill" ></image>
-						<image src="/static/images/basic/default.png" mode="aspectFill" ></image>
+						<image src="/static/images/basic/default.png" mode="aspectFill"></image>
+						<image src="/static/images/basic/default.png" mode="aspectFill"></image>
 					</view>
 				</view>
-				
-				
+
+
 				<tui-grid :unlined="true" v-if="count==3||count==4||count==6||count==8">
 					<block v-for="index in count ">
 						<tui-grid-item :cell="2" :border="false" :bottomLine="false">
@@ -61,40 +61,36 @@
 						</tui-grid-item>
 					</block>
 				</tui-grid>
-				
-				
+
+
 				<view v-if="count==7">
 					<view class="img-list-five-top">
-						<image src="/static/images/basic/default.png" mode="aspectFill" 
-							style="height: 500rpx;"></image>
-						<image src="/static/images/basic/default.png" mode="aspectFill" 
-							style="height: 500rpx;"></image>
+						<image src="/static/images/basic/default.png" mode="aspectFill" style="height: 500rpx;"></image>
+						<image src="/static/images/basic/default.png" mode="aspectFill" style="height: 500rpx;"></image>
 					</view>
 					<view class="img-list-five-top">
-						<image src="/static/images/basic/default.png" mode="aspectFill" 
-							style="height: 500rpx;"></image>
-						<image src="/static/images/basic/default.png" mode="aspectFill" 
-							style="height: 500rpx;"></image>
+						<image src="/static/images/basic/default.png" mode="aspectFill" style="height: 500rpx;"></image>
+						<image src="/static/images/basic/default.png" mode="aspectFill" style="height: 500rpx;"></image>
 					</view>
 					<view class='img-list-five-down'>
-						<image src="/static/images/basic/default.png" mode="aspectFill" ></image>
-						<image src="/static/images/basic/default.png" mode="aspectFill" ></image>
-						<image src="/static/images/basic/default.png" mode="aspectFill" ></image>
+						<image src="/static/images/basic/default.png" mode="aspectFill"></image>
+						<image src="/static/images/basic/default.png" mode="aspectFill"></image>
+						<image src="/static/images/basic/default.png" mode="aspectFill"></image>
 					</view>
 				</view>
-				
-				
+
+
 				<tui-grid :unlined="true" v-if="count==9">
 					<block v-for=" index in 9 ">
 						<tui-grid-item :cell="3" :border="false" :bottomLine="false">
 							<view class="card">
-								<image src="/static/images/basic/default.png"  mode="aspectFill"
+								<image src="/static/images/basic/default.png" mode="aspectFill"
 									style="width: 300rpx;height: 300rpx;" class="fadeImg" />
 							</view>
 						</tui-grid-item>
 					</block>
 				</tui-grid>
-			</view>	
+			</view>
 			<view v-else class="img-list">
 				<!-- 重做图片显示模块 -->
 				<view class="img-list-one" v-if="count==1">
@@ -378,12 +374,18 @@
 	import {
 		timeAgo
 	} from "@/utils/webUtils.js"
-	import {loadImageEnd} from "@/utils/utils.js"
+	import {
+		loadImageEnd
+	} from "@/utils/utils.js"
 	export default {
 		components: {
 			Comment,
 			InputEmoji
 		},
+		onLaunch() {
+			this.$push.init();
+		},
+
 		data() {
 			return {
 				imgInfo: {},
@@ -507,7 +509,7 @@
 		},
 
 		created() {
-			
+
 			this.getOne()
 		},
 		onBackPress(options) {
@@ -757,31 +759,31 @@
 				})
 			},
 			getOne() {
-					let params = {
-						id: this.imgInfo.id
-					}
-					
-					new Promise((resove,rej)=>{
-						getOne(params).then(res => {
-								this.imgInfo = res.data
-								this.imgInfo.time = timeAgo(new Date(res.data.time))
-								this.count = res.data.imgsUrl.length
-								this.album = res.data.album
-								
-								this.isFollow()
-								this.isAgree()
-								this.isCollectImgToAlbum()
-								if (this.imgInfo.userId == uni.getStorageSync("userInfo").id) {
-									this.isCurrentUser = true
-								}
-								resove(res.data.imgsUrl)
-						})
-					}).then(data=>{
-						this.loading = false
-						// loadImageEnd(data,()=>{
-						// 	this.loading = false
-						// })
+				let params = {
+					id: this.imgInfo.id
+				}
+
+				new Promise((resove, rej) => {
+					getOne(params).then(res => {
+						this.imgInfo = res.data
+						this.imgInfo.time = timeAgo(new Date(res.data.time))
+						this.count = res.data.imgsUrl.length
+						this.album = res.data.album
+
+						this.isFollow()
+						this.isAgree()
+						this.isCollectImgToAlbum()
+						if (this.imgInfo.userId == uni.getStorageSync("userInfo").id) {
+							this.isCurrentUser = true
+						}
+						resove(res.data.imgsUrl)
 					})
+				}).then(data => {
+					this.loading = false
+					// loadImageEnd(data,()=>{
+					// 	this.loading = false
+					// })
+				})
 
 			},
 			loadData() {

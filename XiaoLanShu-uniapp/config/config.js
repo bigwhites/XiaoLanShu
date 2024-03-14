@@ -16,7 +16,7 @@ export const appConfig = {
 	// BLOG_SERVER: 'http://192.168.50.83:8078/api/v1/blogServer/'
 
 	// 开发环境
-	WS_API: '192.168.100.10:88s02/api/platform/ws/',
+	WS_API: 'ws://localhost:3001/',
 	USER_INFO: SERVER_IP + __WEB_API__ + 'userInfo/',
 	STATIC_PATH: SERVER_IP + __WEB_API__ + 'messageCentre/',
 	BLOG_SERVER: SERVER_IP + __WEB_API__ + 'blogServer/'

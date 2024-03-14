@@ -3,10 +3,12 @@ package com.ricky.userinfo.serviceImpl;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.github.yulichang.base.MPJBaseServiceImpl;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.ricky.apicommon.XiaoLanShuException;
+import com.ricky.apicommon.constant.Constant;
 import com.ricky.apicommon.constant.RedisLockPrefix;
 import com.ricky.apicommon.constant.RedisPrefix;
 import com.ricky.apicommon.userInfo.DTO.SearchUserDTO;
@@ -15,6 +17,7 @@ import com.ricky.apicommon.userInfo.entity.Follow;
 import com.ricky.apicommon.userInfo.entity.UserDetail;
 import com.ricky.apicommon.userInfo.service.IFollowService;
 import com.ricky.userinfo.config.MailSentRabbitConfig;
+import com.ricky.userinfo.constant.DefaultValue;
 import com.ricky.userinfo.constant.FollowStatusEnum;
 import com.ricky.userinfo.mapper.FollowMapper;
 import com.ricky.userinfo.mapper.UserDetailMapper;
@@ -62,6 +65,8 @@ public class FollowServiceImpl extends MPJBaseServiceImpl<FollowMapper, Follow> 
 
     @Resource
     RabbitTemplate rabbitTemplate;
+    @Resource
+    DefaultValue defaultValue;
 
     final private Logger log = LoggerFactory.getLogger(FollowServiceImpl.class);
 
@@ -338,9 +343,28 @@ public class FollowServiceImpl extends MPJBaseServiceImpl<FollowMapper, Follow> 
                                 for (var fromId : updateIds) {
                                     Follow follow = new Follow(fromId, uuid);
                                     follows.add(follow);
-                                    rabbitTemplate.convertAndSend(MailSentRabbitConfig.EXCHANGE_FOLLOW,  //向消息中心发送消息
-                                            MailSentRabbitConfig.ROUTE_FOLLOW, JSON.toJSONString(follow));
-//
+                                    Map<String, Object> messageBody = new HashMap<>();
+                                    messageBody.put("fromUuid", fromId);
+                                    messageBody.put("toUuid", uuid);
+                                    UserDetail userDetail = userDetailMapper.selectById(fromId);
+                                    String nickname = userDetail.getNickname();
+                                    if (StringUtils.isEmpty(nickname)) {
+                                        nickname = "小蓝书用户";
+                                    }
+                                    messageBody.put("fromNickname", nickname);
+                                    String uAvatar = userDetail.getUAvatar();
+                                    if (StringUtils.isEmpty(uAvatar)) {
+                                        uAvatar =
+                                                Constant.ROOT_PATH
+                                                        + defaultValue.getAvatarPrefix()
+                                                        + "/" + defaultValue.getAvatar();
+                                    } else {
+                                        uAvatar = Constant.ROOT_PATH + defaultValue.getAvatarPrefix() + uAvatar;
+                                    }
+                                    messageBody.put("fromAvatar", uAvatar);
+                                    executor.submit(() -> //向消息中心发送消息
+                                            rabbitTemplate.convertAndSend(MailSentRabbitConfig.EXCHANGE_FOLLOW,
+                                                    MailSentRabbitConfig.ROUTE_FOLLOW, JSON.toJSONString(messageBody)));
                                 }
                                 this.saveBatch(follows);
                             }

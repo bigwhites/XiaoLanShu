@@ -12,7 +12,7 @@ import { FileUploadModule } from './file-upload/file-upload.module';
 import { MessageModule } from './message/message.module';
 import { FollowMessage } from './Entity/FollowMessage';
 import { WSMessageGateway } from './message/message.gateway';
-import { FollowMessageService } from './message/service/FollowMessageService';
+import { FollowMessageService } from './message/service/message.followMessage.service';
 
 @Module({
   imports: [
@@ -20,6 +20,7 @@ import { FollowMessageService } from './message/service/FollowMessageService';
       transports: [
         new winston.transports.DailyRotateFile({
           dirname: `logs`, // 日志保存的目录
+          level: 'debug',
           filename: '%DATE%.log', // 日志名称，占位符 %DATE% 取值为 datePattern 值。
           datePattern: 'YYYY-MM-DD', // 日志轮换的频率，此处表示每天。
           zippedArchive: true, // 是否通过压缩的方式归档被轮换的日志文件。
@@ -77,4 +78,5 @@ import { FollowMessageService } from './message/service/FollowMessageService';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+}

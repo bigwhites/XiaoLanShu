@@ -15,4 +15,6 @@ export class FollowMessage {
   public status: string;
   @Column({ name: 'avatar' })
   public avatar: string;
+  @Column({ name: 'nickname' })
+  public nickname: string;
 }
