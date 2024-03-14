@@ -44,3 +44,4 @@ build/
 /api-common/mvnw.cmd
 /gateway/mvnw.cmd
 /user-info/mvnw.cmd
+node_modules/
