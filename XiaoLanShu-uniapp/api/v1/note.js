@@ -33,5 +33,23 @@ export function changeAgree(blogId, viewUuid) {
 	};
 	const url = appConfig.BLOG_SERVER + 'blog/agreeOrCollect/' + viewUuid
 	return request.get(url, parms);
+}
 
+export function changeCollection(blogId, viewUuid) {
+	let parms = {
+		blogId: blogId,
+		operation: 2
+	};
+	const url = appConfig.BLOG_SERVER + 'blog/agreeOrCollect/' + viewUuid
+	return request.get(url, parms);
+}
+
+export function collectionHistory(viewUuid, page, pageSize) {
+	let parms = {
+		viewUuid: viewUuid,
+		page: page,
+		pageSize: pageSize
+	};
+	const url = appConfig.BLOG_SERVER + '/blog/collectionHistoryByVId';
+	return request.get(url, parms);
 }

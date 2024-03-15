@@ -70,6 +70,8 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
     String blogRootPath;
 
     @Resource
+    BlogCollectionServiceImpl blogCollectionService;
+    @Resource
     StringRedisTemplate stringRedisTemplate;
     @Resource
     RabbitTemplate rabbitTemplate;
@@ -267,6 +269,7 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
             return null;
         });
         noteDto.isAgree = this.isAgree(viewUuid, blogBasicDTO.id);
+        noteDto.isCollection = blogCollectionService.isCollection(blogBasicDTO.id, viewUuid);
         return noteDto;
 
     }
@@ -291,7 +294,7 @@ public class BlogServiceImpl extends MPJBaseServiceImpl<BlogMapper, Blog> implem
         if ((noteCoverDTOPage != null) && !CollectionUtils.isEmpty(noteCoverDTOPage.getRecords())) {
             noteCoverDTOPage.getRecords().forEach(noteCoverDTO -> {
                 noteCoverDTO.coverFileName = blogImageService.fillImagePath(noteCoverDTO.coverFileName, noteCoverDTO.pubUuid);
-
+                noteCoverDTO.isCollection = blogCollectionService.isCollection(noteCoverDTO.blogId, noteCoverDTO.viewUuid);
                 noteCoverDTO.isAgree = this.isAgree(noteCoverDTO.viewUuid, noteCoverDTO.blogId); //查询是否点赞
                 //查询出博客对应的发布人的id（RPC）
                 NoteUserVO noteUser = userBasicService.getNoteUser(noteCoverDTO.pubUuid, null);

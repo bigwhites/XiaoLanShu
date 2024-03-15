@@ -96,9 +96,9 @@
 
 
 
-				<uv-icon name="star-fill" v-if="imgInfo.isCollection==true" size="20"
-					:label="imgInfo.basicInfo.collectionCount"></uv-icon>
-				<uv-icon v-else name="star" size="20" :label="imgInfo.basicInfo.collectionCount"></uv-icon>
+				<uv-icon name="star-fill" v-if="isCollection==true" size="20" @click="collectNote()"
+					:label="collectionCount"></uv-icon>
+				<uv-icon v-else name="star" size="20" :label="collectionCount" @click="collectNote()"></uv-icon>
 
 
 			</view>
@@ -232,7 +232,8 @@
 	import InputEmoji from "@/components/inputEmoji.vue"
 	import {
 		getOneNoteById,
-		changeAgree
+		changeAgree,
+		changeCollection
 	} from '@/api/v1/note.js'
 
 	import {
@@ -276,6 +277,7 @@
 				imgs: {},
 				isAgree: false,
 				agreeCount: null,
+				collectionCount: 0,
 				count: 0,
 				album: {},
 				content: '',
@@ -516,6 +518,18 @@
 					}
 				});
 			},
+			collectNote() {
+				changeCollection(this.imgInfo.basicInfo.id, uni.getStorageSync('userBasic').uuid).then(res => {
+					if (res.success) {
+						this.isCollection = res.data;
+						if (res.data == true) { //原本没有点赞
+							this.collectionCount += 1;
+						} else {
+							this.collectionCount -= 1;
+						}
+					}
+				});
+			},
 
 
 			cancelAgreeComment(comment) {
@@ -527,21 +541,6 @@
 				cancelAgree(data).then()
 			},
 
-			cancelCollect() {
-
-				if (this.imgInfo.userId == uni.getStorageSync("userInfo").id) {
-					return
-				}
-				let data = {}
-				data.uid = uni.getStorageSync("userInfo").id
-				data.agreeCollectId = this.imgInfo.id
-				data.agreeCollectUid = this.imgInfo.userId
-				data.type = 2
-				cancelCollection(data).then(res => {
-					this.isCollection = false
-					this.imgInfo.collectionCount = this.imgInfo.collectionCount * 1 - 1
-				})
-			},
 
 
 			isCollectImgToAlbum() {
@@ -594,7 +593,9 @@
 					if (res.success) {
 						this.imgInfo = res.data;
 						this.isAgree = res.data.isAgree;
+						this.isCollection = res.data.isCollection;
 						this.agreeCount = res.data.basicInfo.agreeCount;
+						this.collectionCount = res.data.basicInfo.collectionCount
 						this.count = res.data.basicInfo.imageList.length;
 						// console.log(this.count)
 						this.imgs = res.data.basicInfo.imageList;

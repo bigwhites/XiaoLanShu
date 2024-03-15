@@ -10,9 +10,7 @@ import com.ricky.apicommon.blogServer.DTO.UploadReqDTO;
 import com.ricky.apicommon.blogServer.VO.NewBlogVO;
 import com.ricky.apicommon.utils.result.R;
 import com.ricky.apicommon.utils.result.ResultFactory;
-import com.ricky.blogserver.serviceImpl.BlogAgreeServiceImpl;
-import com.ricky.blogserver.serviceImpl.BlogServiceImpl;
-import com.ricky.blogserver.serviceImpl.BlogViewServiceImpl;
+import com.ricky.blogserver.serviceImpl.*;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,16 +28,17 @@ import java.util.Objects;
 public class BlogController {
 
     @Resource
-    BlogViewServiceImpl blogViewService;
-
+    private BlogViewServiceImpl blogViewService;
     @Resource
-    BlogServiceImpl blogService;
-
+    private BlogServiceImpl blogService;
     @Resource
-    ElasticsearchTemplate elasticsearchTemplate;
-
+    private ElasticsearchTemplate elasticsearchTemplate;
     @Resource
     private BlogAgreeServiceImpl agreeService;
+    @Resource
+    private BlogCollectionServiceImpl blogCollectionService;
+    @Resource
+    private CollectionHistoryVServiceImpl collectionHistoryVService;
 
 
     @Value("${constant.blogOper.collect}")
@@ -148,16 +147,32 @@ public class BlogController {
         if (Objects.equals(operation, AGREE)) {
             Boolean b = agreeService.agreeBlogById(id, viewUuid);
             return ResultFactory.success(b);
-        } else if (Objects.equals(operation, COLLECT)) {
-            // TODO 收藏功能
-            return null;
+        } else if (Objects.equals(operation, COLLECT)) {  //2
+            Boolean c = blogCollectionService.collectionBlogById(id, viewUuid);
+            return ResultFactory.success(c);
         }
         return ResultFactory.fail();
     }
 
-    @GetMapping("/test")
-    public R<String> test() {
-        return ResultFactory.success("test");
+    /**
+     * @param viewUuid 用户的uuid
+     * @param page     页码
+     * @param pageSize 每页大小
+     * @return 分页对象
+     * @description 分页查询指定用户的收藏记录
+     * @author Ricky01
+     * @since 2024/3/10
+     **/
+    @GetMapping("/collectionHistoryByVId")
+    public R<Page<NoteCoverDTO>> collectionHistoryByVId(
+            @RequestParam("viewUuid") String viewUuid,
+            @RequestParam("page") Integer page,
+            @RequestParam("pageSize") Integer pageSize
+    ) throws Exception {
+        Page<NoteCoverDTO> collectionHistoryByPage =
+                collectionHistoryVService
+                        .getCollectionHistoryByPage(viewUuid, page, pageSize);
+        return ResultFactory.success(collectionHistoryByPage);
     }
 
 

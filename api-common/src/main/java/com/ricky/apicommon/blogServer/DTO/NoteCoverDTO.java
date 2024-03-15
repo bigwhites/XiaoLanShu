@@ -21,4 +21,8 @@ public class NoteCoverDTO {
     public String pubUAvatar;
     public boolean isAgree;
 
+    public boolean isCollection;
+
+    public Long collectionCount;
+
 }
